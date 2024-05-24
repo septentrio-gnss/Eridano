@@ -1,6 +1,6 @@
 # Septentrio Arduino Library
 
-This Arduino library has been created to make Septentrio GNSS easier to use with Arduino hardware. 
+This Arduino library has been created to make Septentrio GNSS easier to use with Arduino hardware. <br>
 /!\ Make sure that all baudrate match to use this library (keep in mind that the default baudrate for Septentrio is 115200 but it is not supported by AltSoftSerial used in the examples).
 
 ## Examples
