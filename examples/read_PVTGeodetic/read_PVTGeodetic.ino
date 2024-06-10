@@ -32,7 +32,7 @@ void setup() {
 void loop() {
   while (mySerial.available()>0)
   {
-    myGNSS.checkNewByte(myGNSS.tempBuffer, mySerial.read(), SBF_SENTENCE, 4007);
+    myGNSS.checkNewByte(myGNSS.tempBuffer, mySerial.read(), 4007);
   }
   revision=myGNSS.SBFBuffer->data[5]>>5;
 

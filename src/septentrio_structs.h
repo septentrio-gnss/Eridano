@@ -42,4 +42,14 @@ struct tempBuffer_t{
     }properties;
 };
 
+struct ntripProperties_t{
+    uint8_t ntripVer=3; //3=ntrip 2.1; 2=ntrip 2.0; 1=ntrip 1.1; 0=ntrip 1.0;
+    char *nmeaData=nullptr;
+    char *Auth64=nullptr;
+    struct {
+        char format[10];
+        char formatDetail[25];
+    }    
+}
+
 #endif

@@ -7,6 +7,7 @@
 constexpr int headerSize = 8;
 constexpr int msgMaxSize = 100; //TODO: check really relevant
 constexpr int nmeaMaxSize = 82; //TODO: check really relevant
+constexpr int ntripMaxSize = 300;;
 
 constexpr long doNotUseTOW = 4294967295;
 constexpr int doNotUseLong = 65535;
@@ -57,6 +58,7 @@ class SEPTENTRIO_GNSS
     
         //Buffer
         tempBuffer_t *tempBuffer = nullptr;
+        ntripTempBuffer_t *ntripBuffer = nullptr;
         nmeaBuffer_t *NMEABuffer = nullptr;
         sbfBuffer_t *SBFBuffer = nullptr;
         void fillBuffer(sbfBuffer_t *buffer, const uint8_t incomingByte);
@@ -66,6 +68,20 @@ class SEPTENTRIO_GNSS
         bool fullBuffer(const sbfBuffer_t *buffer);
         void fillSBFProperties(sbfBuffer_t *buffer, const uint16_t messageID);
 
+        //NTRIP
+        ntrip_params_t ntripProperties=nullptr;
+        char* connectToCaster(ntrip_params_t *ntripProperties)
+        char* requestToCaster(ntrip_params_t *ntripProperties, const char *userMountpoint, const char *userHost, const char *userAgent)
+        bool processMsg(ntripTempBuffer_t *tempBuffer, uint8_t incomingByte)
+        void getNTRIPType(ntripTempBuffer_t *tempBuffer)
+        int getSourceTableLengh(ntripTempBuffer_t *buffer)
+        bool getSourcetable(ntripTempBuffer_t *tempBuffer, uint8_t incomingByte)
+        void extractSentence(const genericBuffer_t *buffer)
+        void processCAS(uint8_t *buffer, int customField)
+        void processNET(uint8_t *buffer, int customField)
+        void processSTR(uint8_t *buffer, int customField)
+        bool getRTCMV2(ntripTempBuffer_t* tempBuffer, uint8_t incomingByte)
+       
         //debugging
         void enableDebug(Stream &debugPort=Serial);
         void disableDebug();
