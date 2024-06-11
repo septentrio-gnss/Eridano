@@ -821,36 +821,288 @@ void SEPTENTRIO_GNSS::fillSBFProperties(sbfBuffer_t *buffer, const uint16_t mess
 }
 
     //  --  NTRIP  --   //
-void getContentType(tempBuffer_t *tempBuffer)
+uint8_t* createRequestMsg(ntripProperties *ntripProperties, char* userMountpoint=nullptr, char* userHost, char* userAgent)
+{
+    char* response;
+    if (ntripParams->ntripVer<2)
+    {
+        reponse=requestMsgVer1();
+    }
+    else
+    {
+        reponse=requestMsgVer2();
+    }
+    return response;
+}
+uint8_t* requestMsgVer1(ntripProperties *ntripProperties, char* userMountpoint=nullptr, char* userHost, char* userAgent)
+{
+    /**
+    * @brief sending a message to the NTRIP1 caster for data
+    * @return The buffer containing the request or a null pointer if the message was too big for the buffer
+    **/
+    char msgBuffer[ntripMaxSize]; //set msg buffer size
+    int writtenBytes = snprintf(msgBuffer, sizeof(msgBuffer), 
+    "GET /%s HTTP/1.0\r\n"
+    "Host: %s\r\n"
+    "Ntrip-Version: Ntrip/%s\r\n"
+    "User-Agent: %s\r\n"
+    "%s%s%s"
+    "Connection: close\r\n"
+    "\r\n%s%s",
+    userMountpoint ? userMountpoint : "", 
+    userHost, 
+    ntripProperties->NTRIPver==0 ? "1.0" : "1.1",
+    userAgent,
+    ntripProperties->userCredent64 ? "Authorization: Basic " : "",  ntripProperties->userCredent64 ? ntripProperties->userCredent64 : "", ntripProperties->userCredent64 ? "\r\n" : ":",
+    ntripProperties->nmeaData ? ntripProperties->nmeaData : "", ntripProperties->nmeaData ? "\r\n" : "");
+    if (writtenBytes<ntripMaxSize)
+    {
+        return (uint8_t*)msgBuffer;
+    }
+    else
+    {
+        if (_printDebug)
+        {
+            _debugPort->println("Message too large for buffer");
+        }
+        return nullptr;
+    }
+}
+uint8_t* requestMsgVer2(ntripProperties *ntripProperties, char* userMountpoint=nullptr, char* userHost, char* userAgent)
+{
+    /**
+    * @brief sending a message to the NTRIP1 caster for sourcetable or data
+    * @return The buffer containing the request or a null pointer if the message was too big for the buffer
+    **/
+    char msgBuffer[ntripMaxSize]; //set msg buffer size
+    int writtenBytes = snprintf(msgBuffer, sizeof(msgBuffer), 
+    "GET /%s HTTP/1.1\r\n"
+    "Host: %s\r\n"
+    "Ntrip-Version: Ntrip/%s\r\n"
+    "User-Agent: %s\r\n"
+    "%s%s%s"
+    "Connection: close\r\n"
+    "%s%s%s\r\n",
+    userMountpoint ? userMountpoint : "", 
+    userHost, 
+    ntripProperties->NTRIPver==2 ? "2.0" : "2.1",
+    userAgent, 
+    ntripProperties->nmeaStr ? "Ntrip-GGA: " : "", ntripProperties->nmeaStr ? ntripProperties->nmeaStr : "", ntripProperties->nmeaStr ? "\r\n" : "",
+    ntripProperties->userCredent64 ? "Authorization: Basic " : "",  ntripProperties->userCredent64 ? ntripProperties->userCredent64 : "", ntripProperties->userCredent64 ? "\r\n" : "");
+    if (writtenBytes<ntripMaxSize)
+    {
+        return (uint8_t*)msgBuffer;
+    }
+    else
+    {
+        if (_printDebug)
+        {
+            _debugPort->println("Message too large for buffer");
+        }
+        return nullptr;
+    }
+}
+bool processAnswer(ntripProperties *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte)
+{
+    bool msgDone;
+    if (tempBuffer->properties.msgValid!=0 && contentType->dataType!=unknown)
+    {
+        if (tempBuffer->properties.contentType!=unknown && ntripBuffer!=nullptr) //process non-text message
+        {
+            msgDone=true;
+            if (ntripBuffer->contentType==sourcetable)
+            {
+                msgDone=processSourcetable(tempBuffer, incomingByte);
+            }
+        }
+        else if (ntripBuffer->contentType==text_html && _printDebug) // display error messages
+        {
+            _debugPort->println()
+        }
+        tempBuffer->offset=0;
+    }
+    else//process header
+    {
+        if (ntripParams->ntripVer<2)
+        {
+            msgDone=processAnswerVer1(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte);
+        }
+        else
+        {
+            msgDone=processAnswerVer2(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte);
+        }
+    }
+    return msgDone;
+}
+bool processHeaderVer1(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte)
+{
+    /**
+    * @brief general processing of message one incoming byte at a time according to NTRIP 1
+    * @param tempBuffer : the buffer for storing the header and keeping track of the message's properties 
+    * @param incomingByte : the byte to process
+    * @return Whether the message is done
+    **/
+    bool msgDone=false;
+    //add way to be sure at the start of msg: headerCount=0;
+    tempBuffer->data[tempBuffer->offset]=incomingByte;
+    tempBuffer->offset++;
+    if (incomingByte=='\n') 
+    {
+        if (tempBuffer->offset<22) //22 max 1st line size
+        {
+            if (std::strncmp((const char*)tempBuffer->data,"ICY 200 OK\r\n", 17)==0)
+            {
+                tempBuffer->properties.msgValid=true;
+                ntripProperties->connected=1;
+                ntripBuffer = new ntripBuffer_t;
+                if (_printDebug) 
+                {
+                    _debugPort->println("The caster sent back the correct response : 200");
+                }
+            }
+            else if (std::strncmp((const char*)tempBuffer->data,"SOURCETABLE 200 OK\r\n", 17)==0 )
+            {
+                tempBuffer->properties.msgValid=true;
+                ntripBuffer = new ntripBuffer_t;
+                ntripProperties->connected=0;
+                if (_printDebug)
+                {
+                    _debugPort->println("The caster sent back the response for an incorrect request, a sourcetable");
+                }
+            }
+            else //Error message
+            { 
+                tempBuffer->offset=0; //reset for next time
+                ntripProperties->connected=0;
+                if (_printDebug) 
+                {
+                    for (int i=0;i<tempBuffer->offset && tempBuffer->data[tempBuffer->offset]!='\n';i++)
+                    {
+                        _debugPort->print(tempBuffer->data[tempBuffer->offset]); //print error type 
+                    }
+                }
+            }
+        }
+        else if (tempBuffer->data[tempBuffer->offset-3]=='\n' && tempBuffer->properties.msgValid)
+        {
+            ntripParams->contentType = getContentType(tempBuffer); //0:gnss/data, 1:gnss/sourcetable, 2:text/html, 3:text/plain
+            if (ntripParams->ContentType==text_plain) 
+            {
+                ntripParams->contentType=sourcetable;
+                if (sourceTableBuff==nullptr)
+                {
+                    sourceTableBuff = new genericBuffer_t;
+                }
+                if (sourceTableBuff->data==nullptr)
+                {
+                    sourceTableBuff->data = new uint8_t[getSourceTableLengh(tempBuffer)+1]; //add space for '\0' to indicate end
+                }
+                tempBuffer->offset=0;
+            }    
+            else if (ntripParams->contentType==unknown && _printDebug)
+            {
+                _debugPort->println("Impossible content type, make sure you're not losing data in transmission");
+            }        
+        }
+    }
+    return msgDone;
+}
+bool processHeaderVer2(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte)
+{
+    /**
+    * @brief general processing of message one incoming byte at a time according to NTRIP 2
+    * @param tempBuffer : the buffer for storing the header and keeping track of the message's properties 
+    * @param incomingByte : the byte to process
+    * @return Whether the message is done
+    **/
+    bool msgDone=false;
+    tempBuffer->data[tempBuffer->offset]=incomingByte;
+    tempBuffer->offset++;
+    if (incomingByte=='\n') 
+    {
+        if (tempBuffer->offset<22) //22 max 1st line size
+        {
+            if (std::strncmp((const char*)tempBuffer->data,"HTTP", 4)==0 && std::strncmp((const char*)tempBuffer->data,"200 OK\r\n", 8)==0)
+            {
+                tempBuffer->properties.msgValid=true;
+                ntripProperties->connected=1;
+                if (_printDebug) 
+                {
+                    _debugPort->println("The caster sent back the correct response : 200");
+                }
+            }
+            else if (std::strncmp((const char*)tempBuffer->data,"ICY 200 OK\r\n", 17)==0 )
+            {
+                tempBuffer->properties.msgValid=true;
+                tempBuffer->properties.NTRIPver=1; //NTRIPv2->v1
+                ntripProperties->connected=1;
+                if (_printDebug)
+                {
+                    _debugPort->println("The caster sent back the response for an incorrect request, switched from NTRIP 1 to NTRIP");
+                }
+            }
+            else 
+            {
+                tempBuffer->offset=0;
+                ntripProperties->connected=-1;
+                if (_printDebug)
+                {
+                    _debugPort->println("Unknown first line header :");
+                    for (int i=0;i<tempBuffer->offset && tempBuffer->data[tempBuffer->offset]!='\n';i++)
+                    {
+                        _debugPort->print(tempBuffer->data[tempBuffer->offset]); //print error type 
+                    }
+                }
+            }
+        }
+        else if (tempBuffer->data[tempBuffer->offset-3]=='\n' && tempBuffer->properties.msgValid)
+        {
+            ntripParams->contentType = getContentType(tempBuffer); //0:gnss/data, 1:gnss/sourcetable, 2:text/html, 3:text/plain
+            if (ntripParams->ContentType==sourcetable) 
+            {
+                if (sourceTableBuff==nullptr)
+                {
+                    sourceTableBuff = new genericBuffer_t;
+                }
+                if (sourceTableBuff->data==nullptr)
+                {
+                    sourceTableBuff->data = new uint8_t[getSourceTableLengh(tempBuffer)+1]; //add space for '\0' to indicate end
+                }
+                tempBuffer->offset=0;
+            }    
+            else if (ntripParams->ContentType=unknown && _printDebug)
+            {
+                _debugPort->println("Impossible content type, make sure no data was lost in transmission")
+            }        
+        }
+    }
+}
+
+CONTENT_TYPE_t getContentType(tempBuffer_t *tempBuffer)
 {
     /**
     * @brief finds the type of the incoming data, compatible with both NTRIP 1 and 2 
     * @brief (text/plain for NTRIP 1 source table is converted to NTRIP 2 gnss/sourcetable)
     * @param tempBuffer : the buffer containing the header's data
     **/
+    CONTENT_TYPE_t contentType=unknown;
     if (std::strstr((const char*)tempBuffer->data, "gnss/data")!=nullptr)
     {
-        tempBuffer->properties.contentType=0;
+        contentType=gnss_data;
     }
     else if (std::strstr((const char*)tempBuffer->data, "gnss/sourcetable")!=nullptr)
     {
-        tempBuffer->properties.contentType=1;
+        contentType=sourcetable;
     }
     else if (std::strstr((const char*)tempBuffer->data, "text/html")!=nullptr)
     {
-        tempBuffer->properties.contentType=2;
+        contentType=text_html;
     }
     else if (std::strstr((const char*)tempBuffer->data, "text/plain")!=nullptr)
     {
-        if (std::strstr((const char*)tempBuffer->data,"SOURCETABLE")!=nullptr && tempBuffer->properties.ntripVer==1)
-        {
-            tempBuffer->properties.contentType=1;
-        }
-        else
-        {
-            tempBuffer->properties.contentType=3;
-        }
+        contentType=text_html;
     }
+    return contentType;
 }
 int getSourceTableLengh(const tempBuffer_t *buffer)
 {
@@ -882,130 +1134,162 @@ int getSourceTableLengh(const tempBuffer_t *buffer)
         return 0;
     }
 }
-void processCAS(const uint8_t *buffer, int customField=0)
+void processCAS(const uint8_t *buffer, const int customField=0)
 {
-    int i=4; //skip "CAS,"
-    std::string tempString;
-    std::string hostName="";
-    while (buffer[i]!=';' && buffer[i-1]!='"') //caster internet host
+    if (_printDebug)
     {
-        hostName+=buffer[i];
-        i++;
-    }
-    _debugPort->print("hostname : ");
-    _debugPort->println(hostName);
-    i++; //skip comma
-    while (buffer[i]!=';' && buffer[i-1]!='"') //port number
-    {
-        tempString+=buffer[i];
-        i++;
-    }
-    int portNumber=std::stoi(tempString);
-    tempString="";
-    _debugPort->print("portNumber : ");
-    _debugPort->println(portNumber);
-    i++; //skip comma
-    std::string identifier="";
-    while (buffer[i]!=';' && buffer[i-1]!='"') //caster identifier
-    {
-        identifier+=buffer[i];
-        i++;
-    }
-    i++; //skip comma
-    _debugPort->print("identifier : ");
-    _debugPort->println(identifier);
-    std::string operatorName="";
-    while (buffer[i]!=';' && buffer[i-1]!='"') //name of agency operating the caster
-    {
-        operatorName+=buffer[i];
-        i++;
-    }
-    _debugPort->print("operatorName : ");
-    _debugPort->println(operatorName);
-    i++; //skip comma
-    int nmeaBool;
-    while (buffer[i]!=';' && buffer[i-1]!='"') //capacity of receiving nmea
-    {
-        tempString+=buffer[i];
-        i++;
-    }
-    nmeaBool=std::stoi(tempString);
-    _debugPort->print("nmeaBool : ");
-    _debugPort->println(nmeaBool);
-    i++; //skip comma
-    std::string country="";
-    while (buffer[i]!=';' && buffer[i-1]!='"') //country code, should be 3 char
-    {
-        country+=buffer[i];
-        i++;
-    }
-    _debugPort->print("country : ");
-    _debugPort->println(country);
-    i++; //skip comma
-    while (buffer[i]!=';' && buffer[i-1]!='"') //latitude, north
-    {
-        tempString+=buffer[i];
-        i++;
-    }
-    float latitude = std::stof(tempString);
-    tempString="";
-    _debugPort->print("latitude : ");
-    _debugPort->println(latitude);
-    i++; //skip comma
-    while (buffer[i]!=';' && buffer[i-1]!='"') //longitude, east
-    {
-        tempString+=buffer[i];
-        i++;
-    }
-    float longitude = std::stof(tempString);
-    tempString="";
-    _debugPort->print("longitude : ");
-    _debugPort->println(longitude);
-    i++; //skip comma
-    std::string fallbackHost="";
-    if (buffer[i]!='\r' || buffer[i]!='\n')
-    {
-        while ((buffer[i]!='\r' && buffer[i+1]!='\n') && (buffer[i]!=';' && buffer[i-1]!='"'))//fallback caster IP
+        int i=4; //skip "CAS,"
+        std::string tempString;
+        std::string hostName="";
+        while (buffer[i]!=';' && buffer[i-1]!='"') //caster internet host
         {
-            fallbackHost+=buffer[i];
+            hostName+=buffer[i];
             i++;
         }
-        _debugPort->print("fallbackHost : ");
-        _debugPort->println(fallbackHost);
+        _debugPort->print("hostname : ");
+        _debugPort->println(hostName);
         i++; //skip comma
-    }
-    if (buffer[i]!='\r' && buffer[i]!='\n')
-    {
-         while (buffer[i]!=';' && buffer[i-1]!='"' && ((buffer[i]!='\r' &&  buffer[i+1]!='\n'))) //fallback port number
+        while (buffer[i]!=';' && buffer[i-1]!='"') //port number
         {
             tempString+=buffer[i];
             i++;
         }
+        int portNumber=std::stoi(tempString);
+        tempString="";
+        _debugPort->print("portNumber : ");
+        _debugPort->println(portNumber);
         i++; //skip comma
-        int fallbackPort=std::stoi(tempString);
-        _debugPort->print("fallbackPort : ");
-        _debugPort->println(fallbackPort);
-    }
-    for (int j=0;j<customField;j++) //custom fields
-    {
-        while ((buffer[i]!=';' &&  buffer[i-1]!='"') && (buffer[i]!='\r' &&  buffer[i+1]!='\n') )
+        std::string identifier="";
+        while (buffer[i]!=';' && buffer[i-1]!='"') //caster identifier
         {
-            //stock data
-        }
-        i++; //skip comma
-    }
-    if (buffer[i]!='\r' && buffer[i]!='\n')
-    {
-        std::string misc="";
-        while ((buffer[i]!=';' && buffer[i-1]!='"') && (buffer[i]!='\r' &&  buffer[i+1]!='\n'))
-        {
-            misc+=buffer[i];
+            identifier+=buffer[i];
             i++;
         }
-        _debugPort->print("misc : ");
-        _debugPort->println(misc);
+        i++; //skip comma
+        _debugPort->print("identifier : ");
+        _debugPort->println(identifier);
+        std::string operatorName="";
+        while (buffer[i]!=';' && buffer[i-1]!='"') //name of agency operating the caster
+        {
+            operatorName+=buffer[i];
+            i++;
+        }
+        _debugPort->print("operatorName : ");
+        _debugPort->println(operatorName);
+        i++; //skip comma
+        int nmeaBool;
+        while (buffer[i]!=';' && buffer[i-1]!='"') //capacity of receiving nmea
+        {
+            tempString+=buffer[i];
+            i++;
+        }
+        nmeaBool=std::stoi(tempString);
+        _debugPort->print("nmeaBool : ");
+        _debugPort->println(nmeaBool);
+        i++; //skip comma
+        std::string country="";
+        while (buffer[i]!=';' && buffer[i-1]!='"') //country code, should be 3 char
+        {
+            country+=buffer[i];
+            i++;
+        }
+        _debugPort->print("country : ");
+        _debugPort->println(country);
+        i++; //skip comma
+        while (buffer[i]!=';' && buffer[i-1]!='"') //latitude, north
+        {
+            tempString+=buffer[i];
+            i++;
+        }
+        float latitude = std::stof(tempString);
+        tempString="";
+        _debugPort->print("latitude : ");
+        _debugPort->println(latitude);
+        i++; //skip comma
+        while (buffer[i]!=';' && buffer[i-1]!='"') //longitude, east
+        {
+            tempString+=buffer[i];
+            i++;
+        }
+        float longitude = std::stof(tempString);
+        tempString="";
+        _debugPort->print("longitude : ");
+        _debugPort->println(longitude);
+        i++; //skip comma
+        std::string fallbackHost="";
+        if (buffer[i]!='\r' || buffer[i]!='\n')
+        {
+            while ((buffer[i]!='\r' && buffer[i+1]!='\n') && (buffer[i]!=';' && buffer[i-1]!='"'))//fallback caster IP
+            {
+                fallbackHost+=buffer[i];
+                i++;
+            }
+            _debugPort->print("fallbackHost : ");
+            _debugPort->println(fallbackHost);
+            i++; //skip comma
+        }
+        if (buffer[i]!='\r' && buffer[i]!='\n')
+        {
+            while (buffer[i]!=';' && buffer[i-1]!='"' && ((buffer[i]!='\r' &&  buffer[i+1]!='\n'))) //fallback port number
+            {
+                tempString+=buffer[i];
+                i++;
+            }
+            i++; //skip comma
+            int fallbackPort=std::stoi(tempString);
+            _debugPort->print("fallbackPort : ");
+            _debugPort->println(fallbackPort);
+        }
+        for (int j=0;j<customField;j++) //custom fields
+        {
+            while ((buffer[i]!=';' &&  buffer[i-1]!='"') && (buffer[i]!='\r' &&  buffer[i+1]!='\n') )
+            {
+                _debugPort->print(buffer[i]);
+                i++;
+            }
+            i++; //skip comma
+        }
+        if (buffer[i]!='\r' && buffer[i]!='\n')
+        {
+            std::string misc="";
+            while ((buffer[i]!=';' && buffer[i-1]!='"') && (buffer[i]!='\r' &&  buffer[i+1]!='\n'))
+            {
+                misc+=buffer[i];
+                i++;
+            }
+            _debugPort->print("misc : ");
+            _debugPort->println(misc);
+        }
     }
-    //';' delimiter
+    int index;
+    if (ntripParams.nmeaData==nullptr) //check really no need for nmea
+    {
+        index=0;
+        for (i=0;j<5;i++) //skip to nmea part
+        {
+            for (int j=0; buffer[j]!=','; j++){index++;}
+        }
+        if (buffer[index]=='1')
+        {
+            sourceTableBuff->data = new uint8_t[tempBuffer->msgSize+1];
+        }
+    }
+    index=0; //get fallback info
+    for (i=0;j<10;i++) 
+    {
+        for (int j=0; buffer[j]!=','; j++){index++;}
+    }
+    for (int i=0; buffer[index]!=','&&i<128; i++)
+    {
+        ntripParams->fallback.Host[i]=buffer[index];
+        index++;
+    }
+    std::string tempString="";
+    while (buffer[index]!=',')
+    {
+        tempString+=(char)buffer[index];
+    }
+    ntripParams->fallback.Port=stoi(tempString);
 }
 void processNET(const uint8_t *buffer, int customField=0)
 {
@@ -1318,7 +1602,7 @@ void extractSentence(const genericBuffer_t *buffer)
         i+=sentenceSize;
     }
 }
-bool getSourcetable(tempBuffer_t *tempBuffer, const uint8_t incomingByte)
+bool processSourcetable(tempBuffer_t *tempBuffer, const uint8_t incomingByte)
 {
     /**
     * @brief process sourcetable by storing the bytes into the sourceTableBuff buffer and adding '\0' at the end
@@ -1342,7 +1626,7 @@ bool getSourcetable(tempBuffer_t *tempBuffer, const uint8_t incomingByte)
     }    
     return tableDone;
 }
-bool getRTCMV2(tempBuffer_t* tempBuffer, const uint8_t incomingByte)
+/*bool getRTCMV2(tempBuffer_t* tempBuffer, const uint8_t incomingByte)
 {
     /**
     * @brief Process RTCM messages by pushing them to the serial connecting to the receiver
@@ -1350,7 +1634,7 @@ bool getRTCMV2(tempBuffer_t* tempBuffer, const uint8_t incomingByte)
     * @param incomingByte : the byte to process
     * @return Whether the message is done
     **/
-    bool msgDone=false;
+    /*bool msgDone=false;
     _serialPort->write(incomByte);
     if (tempBuffer->properties.msgValid==3) //1: 1st line done; 2: header done, 3: data done; here incomByte devrait = '\n'
     {
@@ -1363,153 +1647,9 @@ bool getRTCMV2(tempBuffer_t* tempBuffer, const uint8_t incomingByte)
     }
     tempBuffer->data[0]=incomingByte;
     return msgDone;
-}
-bool processMsg(tempBuffer_t *tempBuffer, const uint8_t incomingByte)
-{
-    /**
-    * @brief general processing of message one incoming byte at a time
-    * @param tempBuffer : the buffer for storing the header and keeping track of the message's properties 
-    * @param incomingByte : the byte to process
-    * @return Whether the message is done
-    **/
-    bool msgDone=false;
-    if (tempBuffer->properties.msgValid>0 && (int)tempBuffer->properties.contentType<2) //process non-text message
-    {
-        if (tempBuffer->properties.contentType==0)
-        {
-            msgDone=getRTCMV2(tempBuffer, incomingByte);
-        }
-        else
-        {
-            msgDone=getSourcetableV2(tempBuffer, incomingByte);
-        }
-    }
-    else 
-    {
-        //add way to be sure at the start of msg
-        tempBuffer->data[tempBuffer->offset]=incomingByte;
-        tempBuffer->offset++;
-        if (incomingByte=='\n') 
-        {
-            if (tempBuffer->offset<22) //22 max 1st line size
-            {
-                if (std::strncmp((const char*)tempBuffer->data,"HTTP/1.0 200 OK\r\n", 17)==0 || std::strncmp((const char*)tempBuffer->data,"HTTP/1.1 200 OK\r\n", 17)==0)
-                {
-                    tempBuffer->properties.msgValid=true;
-                    if (_printDebug) 
-                    {
-                        _debugPort->println("The caster sent back the correct response : 200");
-                    }
-                }
-                else if (std::strncmp((const char*)tempBuffer->data,"ICY 200 OK\r\n", 17)==0 )
-                {
-                    tempBuffer->properties.msgValid=true;
-                    if (tempBuffer->properties.NTRIPver=2)
-                    {
-                        tempBuffer->properties.NTRIPver=1; //NTRIPv2->v1
-                    }
-                    if (_printDebug)
-                    {
-                        _debugPort->println("The caster sent back the response for an incorrect request");
-                    }
-                }
-                else if (std::strncmp((const char*)tempBuffer->data,"SOURCETABLE 200 OK\r\n", 17)==0)
-                {
-                    tempBuffer->properties.msgValid=true;
-                    if (tempBuffer->properties.NTRIPver=2)
-                    {
-                        if (_printDebug)
-                        {
-                            _debugPort->println("Switched to NTRIP v1");
-                            _debugPort->println("Invalid request : will print source table to compare for error");
-                        }
-                        tempBuffer->properties.NTRIPver=1; //NTRIPv2->v1
-                        tempBuffer->properties.contentType=1;
-                    }
-                }
-                else //Error handling
-                { 
-                    tempBuffer->offset=0; //reset for next time
-                    if (_printDebug)
-                    {
-                        if (std::strstr((const char*)tempBuffer->data,"401")!=nullptr)
-                        {
-                            _debugPort->println("Error 401 : No or wrong authorization");
-                        }
-                        else if (std::strstr((const char*)tempBuffer->data,"404")!=nullptr)
-                        {
-                            _debugPort->println("Error 404 : Requested mountpoint not found");
-                        }
-                        else if (std::strstr((const char*)tempBuffer->data,"409")!=nullptr)
-                        {
-                            _debugPort->println("Error 409 : Mountpoint already used");
-                        }
-                        else if (std::strstr((const char*)tempBuffer->data,"500")!=nullptr)
-                        {
-                            _debugPort->println("Error 500 : NTRIP internal error");
-                        }
-                        else if (std::strstr((const char*)tempBuffer->data,"501")!=nullptr)
-                        {
-                            _debugPort->println("Error 501 : Requested function not implemented in NTRIP caster");
-                        }
-                        else if (std::strstr((const char*)tempBuffer->data,"503")!=nullptr)
-                        {
-                            _debugPort->println("Error 503 : NTRIP caster overload or bandwidth limitation");
-                        }
-                        else
-                        {
-                            _debugPort->println("Unknown error : Check no data was lost in the transmission");                            
-                        }
-                    }
-                }
-            }
-            else if (tempBuffer->data[tempBuffer->offset-3]=='\n' && tempBuffer->properties.msgValid)
-            {
-                getContentType(tempBuffer); //0:gnss/data, 1:gnss/sourcetable, 2:text/html, 3:text/plain
-                switch (tempBuffer->properties.contentType)
-                {
-                case 0:
-                    tempBuffer->offset=0;
-                    break;
-                case 1:
-                    tempBuffer->msgSize = getSourceTableLengh(tempBuffer);
-                    tempBuffer->properties.filltable=true;
-                    if (sourceTableBuff==nullptr)
-                    {
-                        sourceTableBuff = new genericBuffer_t;
-                    }
-                    if (sourceTableBuff->data==nullptr)
-                    {
-                        sourceTableBuff->data = new uint8_t[tempBuffer->msgSize+1]; //add space for  "ENDSOURCETABLE\r\n"
-                    }
-                    tempBuffer->offset=0;
-                    break;
-                case 2:
-                    if (tempBuffer->properties.NTRIPver=1)
-                    {
-                        tempBuffer->properties.contentType=1
-                    }
-                case 3:
-                    if (_printDebug)
-                    {
-                        _debugPort->println("Error, printing the header");
-                        for (int i=0;i<tempBuffer->offset;i++)
-                        {
-                            _debugPort->print(tempBuffer->data[i]); 
-                        }
-                    }
-                    tempBuffer->offset=0;
-                    break;
-                default:
-                    break;
-                }
-                
-            }
-        }
-    }
-    return msgDone;
-}
-char* requestToCaster(ntrip_params_t *ntripProperties, const char *userMountpoint="", const char *userHost="", const char *userAgent="") //3=2.1, 2=2.0, 1=1.1, 0=1.0
+}*/
+
+char* httpRequestToCaster(const char *userMountpoint="", const char *userHost="", const char *userAgent="") //3=2.1, 2=2.0, 1=1.1, 0=1.0
 {
     /**
     * @brief sending a message to the NTRIP caster (NTRIP1 or NTRIP2) for sourcetable or data
@@ -1575,7 +1715,7 @@ char* requestToCaster(ntrip_params_t *ntripProperties, const char *userMountpoin
         return nullptr;
     }
 }
-bool connectToCasterMsg(const ntrip_params_t *ntripProperties, const char *userMountpoint="", const char *userHost="", const char *userAgent="")
+bool rtpConnectToCasterMsg(const char *userMountpoint="", const char *userHost="", const char *userAgent="")
 {
     switch (ntripProperties->NTRIPver)
     {
@@ -1624,7 +1764,7 @@ bool connectToCasterMsg(const ntrip_params_t *ntripProperties, const char *userM
     }
     return writtenBytes<(sizeof(msgBuffer));
 }
-bool startTransferToCastersMsg(const ntrip_params_t *ntripProperties, char* session )
+bool rtpStartTransferToCastersMsg(const ntrip_params_t *ntripProperties, char* session )
 {
     writtenBytes = snprintf(msgBuffer, sizeof(msgBuffer), 
     "PLAY rtsp://%s/%s RTSP/1.0\r\n"
@@ -1635,7 +1775,7 @@ bool startTransferToCastersMsg(const ntrip_params_t *ntripProperties, char* sess
     sessionNum);
     return writtenBytes<(sizeof(msgBuffer));
 }
-bool endTransferToCasterMsg(const ntrip_params_t *ntripProperties,)
+bool rtpEndTransferToCasterMsg(const ntrip_params_t *ntripProperties,)
 {
     writtenBytes = snprintf(msgBuffer, sizeof(msgBuffer),
     "TEARDOWN rtsp://%s/%s RTSP/1.0\r\n"
