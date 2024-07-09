@@ -58,7 +58,6 @@ class SEPTENTRIO_GNSS
     
         //Buffer
         tempBuffer_t *tempBuffer = nullptr;
-        ntripTempBuffer_t *ntripBuffer = nullptr;
         nmeaBuffer_t *NMEABuffer = nullptr;
         sbfBuffer_t *SBFBuffer = nullptr;
         void fillBuffer(sbfBuffer_t *buffer, const uint8_t incomingByte);
@@ -70,6 +69,7 @@ class SEPTENTRIO_GNSS
 
         //NTRIP
         ntrip_params_t ntripProperties=nullptr;
+        ntripBuffer_t ntripBuffer=nullptr;
         char* connectToCaster(ntrip_params_t *ntripProperties)
         char* requestToCaster(ntrip_params_t *ntripProperties, const char *userMountpoint, const char *userHost, const char *userAgent)
         bool processMsg(ntripTempBuffer_t *tempBuffer, uint8_t incomingByte)

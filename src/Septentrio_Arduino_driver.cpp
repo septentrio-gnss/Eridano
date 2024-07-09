@@ -907,13 +907,10 @@ bool processAnswer(ntripProperties *ntripParams, tempBuffer_t *tempBuffer, const
     bool msgDone;
     if (tempBuffer->properties.msgValid!=0 && contentType->dataType!=unknown)
     {
-        if (tempBuffer->properties.contentType!=unknown && ntripBuffer!=nullptr) //process non-text message
+        if (ntripBuffer->contentType==sourcetable && ntripBuffer!=nullptr) //process non-text message
         {
             msgDone=true;
-            if (ntripBuffer->contentType==sourcetable)
-            {
-                msgDone=processSourcetable(tempBuffer, incomingByte);
-            }
+            msgDone=processSourcetable(tempBuffer, incomingByte);
         }
         else if (ntripBuffer->contentType==text_html && _printDebug) // display error messages
         {
@@ -929,7 +926,7 @@ bool processAnswer(ntripProperties *ntripParams, tempBuffer_t *tempBuffer, const
         }
         else
         {
-            msgDone=processAnswerVer2(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte);
+           msgDone=processAnswerVer2(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer, const uint8_t incomingByte);
         }
     }
     return msgDone;
@@ -1077,7 +1074,7 @@ bool processHeaderVer2(ntripProperties_t *ntripParams, tempBuffer_t *tempBuffer,
         }
     }
 }
-
+    //  --  NTRIP helper functions  --  //
 CONTENT_TYPE_t getContentType(tempBuffer_t *tempBuffer)
 {
     /**
@@ -1648,73 +1645,7 @@ bool processSourcetable(tempBuffer_t *tempBuffer, const uint8_t incomingByte)
     tempBuffer->data[0]=incomingByte;
     return msgDone;
 }*/
-
-char* httpRequestToCaster(const char *userMountpoint="", const char *userHost="", const char *userAgent="") //3=2.1, 2=2.0, 1=1.1, 0=1.0
-{
-    /**
-    * @brief sending a message to the NTRIP caster (NTRIP1 or NTRIP2) for sourcetable or data
-    * @param ntripProperties The properties of the NTRIP caster
-    * @return Whether the message could fit in the buffer
-    **/
-    char msgBuffer[ntripMaxSize]; //set msg buffer size
-    int writtenBytes; //init here?
-
-    switch (ntripProperties->NTRIPver)
-    {
-        case 0:
-        case 1:
-            writtenBytes = snprintf(msgBuffer, sizeof(msgBuffer), 
-            "GET /%s HTTP/1.0\r\n"
-            "Host: %s\r\n"
-            "Ntrip-Version: Ntrip/%s\r\n"
-            "User-Agent: %s\r\n"
-            "%s%s%s"
-            "Connection: close\r\n"
-            "%s%s%s\r\n",
-            userMountpoint ? userMountpoint : "", 
-            userHost, 
-            ntripProperties->NTRIPver==0 ? "1.0" : "1.1",
-            userAgent, 
-            ntripProperties->nmeaStr ? "Ntrip-GGA: " : "", ntripProperties->nmeaStr ? ntripProperties->nmeaStr : "", ntripProperties->nmeaStr ? "\r\n" : "",
-            ntripProperties->userCredent64 ? "Authorization: Basic " : "",  ntripProperties->userCredent64 ? ntripProperties->userCredent64 : "", ntripProperties->userCredent64 ? "\r\n" : ":");
-            break;
-        case 2:
-        case 3:
-            writtenBytes = snprintf(msgBuffer, sizeof(msgBuffer), 
-            "GET /%s HTTP/1.1\r\n"
-            "Host: %s\r\n"
-            "Ntrip-Version: Ntrip/%s\r\n"
-            "User-Agent: %s\r\n"
-            "%s%s%s"
-            "Connection: close\r\n"
-            "%s%s%s\r\n",
-            userMountpoint ? userMountpoint : "", 
-            userHost, 
-            ntripProperties->NTRIPver==2 ? "2.0" : "2.1",
-            userAgent, 
-            ntripProperties->nmeaStr ? "Ntrip-GGA: " : "", ntripProperties->nmeaStr ? ntripProperties->nmeaStr : "", ntripProperties->nmeaStr ? "\r\n" : "",
-            ntripProperties->userCredent64 ? "Authorization: Basic " : "",  ntripProperties->userCredent64 ? ntripProperties->userCredent64 : "", ntripProperties->userCredent64 ? "\r\n" : "");
-            break;
-        default:
-            if (_printDebug) 
-            {
-                _debugPort->println("unrecongised of unsupported version of NTRIP");
-            }
-            break;
-    }
-    if (writtenBytes<ntripMaxSize)
-    {
-        return msgBuffer;
-    }
-    else
-    {
-        if (_printDebug)
-        {
-            _debugPort->println("Message too large for buffer");
-        }
-        return nullptr;
-    }
-}
+    //  --  NTRIP RTP  --  //
 bool rtpConnectToCasterMsg(const char *userMountpoint="", const char *userHost="", const char *userAgent="")
 {
     switch (ntripProperties->NTRIPver)
