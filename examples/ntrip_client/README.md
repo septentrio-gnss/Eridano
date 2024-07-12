@@ -1,12 +1,13 @@
 # Client NTRIP example #
 
 ## What is NTRIP ? ##
-NTRIP, or Netwerkod Transport of RTCM via Internet Protocol, is a protocol for streaming RTK (Real Time Kinematic) corrections through an internet connection. It is based on HTTP/1.1 protocol.  
-* A caster : 
-* A server :
-* A client : 
+<img align=right src="./NTRIP_diagram.png" width=330 height=200/>
+NTRIP, or Network Transport of RTCM via Internet Protocol, is a protocol for streaming RTK (Real Time Kinematic) corrections through an internet connection. <br>
 
-[insert image]
+It is based on HTTP/1.1 protocol and is composed of:
+* A caster : 
+* A client : for data access
+* A server : for upload from an input source
 
 ## This example ##
 
@@ -20,7 +21,7 @@ This example requires :
 * a Septentrio receiver, make sure its baudrate and the one used in the code match
 * a uart connection between the Arduino and Septentrio receiver 
 
-[show image, arduino connected through uart to receiver]
+<img align=center src="./hardware_setup.jpg" width=354 height=266/>
 
 ### How it works ###
 This example is composed of two files:
@@ -31,7 +32,6 @@ Once connected, the program will process data depending on their type:
 * gnss/data will be passed directly to the receiver for correction (in chunks if it is how the messages are being sent)
 * sourcetable will be used to verify and potentially correct the known NTRIP properties
 * other type of data will be ignored 
-Messages are sent to the Serial monitor but can be commented out.
 
 This program can also be run with a debug mode to use with a monitor (ex. the Serial Monitor) which will display : 
 * A successfull connection with the corresponding code **200**

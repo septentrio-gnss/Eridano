@@ -5,6 +5,8 @@
 //
 //This code was tested with an Arduino with only one serial port and used AltSoftSerial to remedy:
 //If you have more than 1 serial port, you do not need this library 
+//
+//author: Chiara de Saint Giniez
 
 #include <AltSoftSerial.h>
 #include <Septentrio_Arduino_driver.h>

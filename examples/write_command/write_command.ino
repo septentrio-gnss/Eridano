@@ -1,9 +1,11 @@
 //Allows for writing any command to the GNSS through the Serial monitor
 //The GNSS' response is printed in the serial monitor as well
-//Be aware that the chosen baudrate must match, if you use AltSoftSerial not all baudrates are possible
+//Be aware that the chosen baudrate must match, with some libraries not all baudrates are possible
 //
 //This code was tested with an Arduino with only one serial port and used AltSoftSerial to remedy:
 //If you have more than 1 serial port, you do not need this library 
+//
+//author: Chiara de Saint Giniez
 
 #include <AltSoftSerial.h>
 #include <Septentrio_Arduino_driver.h>

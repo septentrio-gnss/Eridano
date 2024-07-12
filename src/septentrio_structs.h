@@ -42,7 +42,15 @@ struct tempBuffer_t{
     }properties;
 };
 
-typdef enum {unknown, gnss_data, sourcetable, text_html,text_plain} CONTENT_TYPE_t;
+typedef enum {unknown, gnss_data, sourcetable, text_html,text_plain} CONTENT_TYPE_t;
+struct ntripTempBuffer_t {
+    CONTENT_TYPE_t contentType=unknown; 
+    uint8_t data[ntripHeaderMaxSize];
+    int offset=0;
+    int msgSize=0;
+    bool msgValid;   
+};
+
 struct ntripBuffer_t{
     CONTENT_TYPE_t contentType=unknown; 
     int offset=0;
@@ -52,11 +60,17 @@ struct ntripBuffer_t{
 typedef enum {HTTP, RTP, NTRIP1} NTRIP_PROTOCOL_t;
 struct ntripProperties_t{
     NTRIP_PROTOCOL_t protocol=HTTP;
+    bool connected=false;
     uint8_t ntripVer=3; //3=ntrip 2.1; 2=ntrip 2.0; 1=ntrip 1.1; 0=ntrip 1.0;
     char *nmeaData=nullptr;
-    char *Auth64=nullptr;
+    char *userCredent64=nullptr;
+    char *custom=nullptr;
     struct {
-        uint8_t Host[128];
+        char *Host=nullptr; 
+        char *Mountpoint=nullptr;
+    }caster;
+    struct {
+        uint8_t *Host=nullptr;
         int Port=0;
     }fallback;
 };

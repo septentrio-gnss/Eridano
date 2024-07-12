@@ -2,7 +2,12 @@
 
 ## What this example does ##
 
-This examples sets up a connection between the Arduino board and the Septentrion GNSS, parses the incoming data and displays it in the serial monitor. It takes do-not-use values into account and displays them as INVALID. Raw bit value are not translated to their meaning.
+This examples sets up a connection between the Arduino board and the Septentrion GNSS, parses the incoming data and displays it in the serial monitor. It takes do-not-use values into account and displays them as "INVALID". Raw bit value are not translated to their meaning.
+
+### Learn more about SBF
+
+PVTGeodetic is the proprietary septentrio PVT message in a geodetic system (as opposed to carthesian), it is part of Septentrio's SBF messages. <br>
+SBF is the Septentrio proprietary binary message format, you can learn more about it [here](https://customersupport.septentrio.com/s/article/What-is-SBF-and-where-can-I-find-more-information-about-it).
 
 ## The PVTGeodetic block ##
 
@@ -51,3 +56,4 @@ Revision 2 :
 | 91          | VAccuracy  | 0.01 m           | 2 bytes unsigned integer | 2-sigma vertical accuracy. The vertical distance between the true position and the computed position is expected to be lower than VAccuracy with a probability of at least 95%. The value is clipped to 65534 =655.34m. <br> DO-NOT-USE value is : **65535**|
 | 93          | Misc       |                  | 1 byte unsigned integer  | Bit field containing miscellaneous flags: <ul> <li> Bit 0: In DGNSS or RTK mode, set if the baseline points to the base station ARP. Unset if it points to the antenna phase center, or if unknown. </li> <li> Bit 1: Set if the phase center offset is compensated for at the rover, unset if not or unknown. </li> <li> Bit 2: Proprietary. </li> <li> Bit 3: Proprietary. </li> <li> Bits 4-5: Proprietary. </li> <li> Bits 6-7: Flag indicating whether the marker position reported in this block is also the ARP position (i.e. whether the ARP-to- marker offset provided with the setAntennaOffset command is zero or not) <ul> <li> 0: Unknown </li> <li> 1: The ARP-to-marker offset is zero </li> <li> 2: The ARP-to-marker offset is not zero </li> </ul> </li> </ul> 
 | 94          | Padding   |                   | n byte unsigned integer  | Padding bytes |
+

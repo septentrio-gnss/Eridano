@@ -1,13 +1,19 @@
 #ifndef SEPTENTRIO_ARDUINO_DRIVER_H
 #define SEPTENTRIO_ARDUINO_DRIVER_H
 
-#include "Arduino.h" 
+#include <Arduino.h>
 #include "septentrio_structs.h"
 
 constexpr int headerSize = 8;
-constexpr int msgMaxSize = 100; //TODO: check really relevant
+constexpr int cmdMaxSize = 100; //TODO: check really relevant
 constexpr int nmeaMaxSize = 82; //TODO: check really relevant
-constexpr int ntripMaxSize = 300;;
+
+
+//NTRIP Request sizes
+constexpr int ntripHeaderMaxSize = 300; //TODO
+constexpr int requestStandardMaxSize=500;
+constexpr int RequestAuthMaxSize=50; //TODO: check
+constexpr int RequestCustomMaxSize=100; //Added for potential other requirements of the ntrip caster
 
 constexpr long doNotUseTOW = 4294967295;
 constexpr int doNotUseLong = 65535;
@@ -21,7 +27,6 @@ class SEPTENTRIO_GNSS
     private:
         Stream *_serialPort;
         Stream *_debugPort;
-        bool _signsOfLife;
         bool _printDebug=false;
 
     public:
@@ -42,7 +47,7 @@ class SEPTENTRIO_GNSS
         uint32_t u4Conv(const sbfBuffer_t *buffer, const uint16_t offset);
         uint64_t u8Conv(const sbfBuffer_t *buffer, const uint16_t offset);
         uint16_t i2Conv(const sbfBuffer_t *buffer, const uint16_t offset);
-        uint16_t i4Conv(const sbfBuffer_t *buffer, const uint16_t offset);
+        uint32_t i4Conv(const sbfBuffer_t *buffer, const uint16_t offset);
         uint64_t i8Conv(const sbfBuffer_t *buffer, const uint16_t offset);
         float f4Conv(const sbfBuffer_t *buffer, const uint16_t offset);
         double f8Conv(const sbfBuffer_t *buffer, const uint16_t offset);
@@ -58,6 +63,7 @@ class SEPTENTRIO_GNSS
     
         //Buffer
         tempBuffer_t *tempBuffer = nullptr;
+        ntripBuffer_t *ntripBuffer = nullptr;
         nmeaBuffer_t *NMEABuffer = nullptr;
         sbfBuffer_t *SBFBuffer = nullptr;
         void fillBuffer(sbfBuffer_t *buffer, const uint8_t incomingByte);
@@ -67,20 +73,50 @@ class SEPTENTRIO_GNSS
         bool fullBuffer(const sbfBuffer_t *buffer);
         void fillSBFProperties(sbfBuffer_t *buffer, const uint16_t messageID);
 
+        //debugging
+        void enableDebug(Stream &debugPort=Serial);
+        void disableDebug();
+};
+
+class SEPTENTRIO_NTRIP
+{
+    private :
+        Stream *_debugPort;
+        bool _printDebug=false;
+
+    public:
+        //constructor
+        SEPTENTRIO_NTRIP();
+        //destructor
+        virtual ~SEPTENTRIO_NTRIP();
+        //connection
+        bool connectToReceiver(Stream &receiverPort, int receiverTimeOut=5000);
+
         //NTRIP
-        ntrip_params_t ntripProperties=nullptr;
-        ntripBuffer_t ntripBuffer=nullptr;
-        char* connectToCaster(ntrip_params_t *ntripProperties)
-        char* requestToCaster(ntrip_params_t *ntripProperties, const char *userMountpoint, const char *userHost, const char *userAgent)
-        bool processMsg(ntripTempBuffer_t *tempBuffer, uint8_t incomingByte)
-        void getNTRIPType(ntripTempBuffer_t *tempBuffer)
-        int getSourceTableLengh(ntripTempBuffer_t *buffer)
-        bool getSourcetable(ntripTempBuffer_t *tempBuffer, uint8_t incomingByte)
-        void extractSentence(const genericBuffer_t *buffer)
-        void processCAS(uint8_t *buffer, int customField)
-        void processNET(uint8_t *buffer, int customField)
-        void processSTR(uint8_t *buffer, int customField)
-        bool getRTCMV2(ntripTempBuffer_t* tempBuffer, uint8_t incomingByte)
+        char* ntripRequestBuffer=nullptr;
+        ntripTempBuffer_t *ntripTempBuffer=nullptr;
+        ntripBuffer_t *ntripBuffer = nullptr;
+        ntripProperties_t *ntripProperties=nullptr;
+        bool resetNtripMsg();
+        bool createRequestMsg(const char* userAgent);
+        bool requestMsgVer1(const char* userAgent);
+        bool requestMsgVer2(const char* userAgent);
+        bool processAnswer(ntripTempBuffer_t *ntripTempBuffer, const uint8_t incomingByte);
+        bool processHeaderVer1(ntripTempBuffer_t *ntripTempBuffer, const uint8_t incomingByte);
+        bool processHeaderVer2(ntripTempBuffer_t *ntripTempBuffer, const uint8_t incomingByte);
+        CONTENT_TYPE_t getContentType(const ntripTempBuffer_t *ntripTempBuffer);
+        bool getTransferEncoding(ntripTempBuffer_t *ntripTempBuffer);
+        int getContentLengh(const ntripTempBuffer_t *ntripTempBuffer);
+        void extractSentence(const ntripBuffer_t *ntripBuffer);
+        bool processSourcetable(ntripBuffer_t *ntripBuffer, const uint8_t incomingByte);
+        void processCAS(const uint8_t buffer[200], const int customField=0);
+        void processNET(const uint8_t buffer[200], const int customField=0);
+        void processSTR(const uint8_t buffer[200], const int customField=0);
+        void casterRequirement(const uint8_t buffer[200]);
+
+        bool rtpConnectToCasterMsg(const char *userHost, const char *userAgent, const char* localPort, const char *userMountpoint);
+        bool rtpStartTransferToCastersMsg(char* sessionNum, const char *userHost, const char *userMountpoint);
+        bool rtpEndTransferToCasterMsg(const char* userHost, const char *sessionNum, const char *userMountpoint);
        
         //debugging
         void enableDebug(Stream &debugPort=Serial);

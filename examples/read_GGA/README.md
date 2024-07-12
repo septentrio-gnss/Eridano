@@ -2,9 +2,9 @@
 
 ## What this example does ##
 
-This examples sets up a connection between the Arduino board and the Septentrion GNSS, parses the incoming data and displays it in the serial monitor. 
+This examples sets up a connection between the Arduino board and the Septentrion GNSS, and displays it in the serial monitor. 
 It test the ID and checksum and displays the raw message with empty fields left if they are correct
-The message ID can be fully explicit or use '*' for any character (for instance : 'G*GGA' to allow 'GP', 'GN'... ).
+The message ID *msgId* can be fully explicit or use '*' for any character (for instance : 'G*GGA' to allow 'GP', 'GN'... ).
 
 ## The NMEA message ##
 
