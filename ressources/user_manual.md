@@ -175,7 +175,7 @@ Mind that the buffer alloted is only 82 bytes long, if you're using bigger messa
 * [How to adapt it for you](#how-to-adapt-it-for-you-3)  
 
 #### What is NTRIP?
-<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/NTRIP_diagram.png" width=330 height=200/>
+<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/NTRIP_diagram.png" width=330 height=200/>
 NTRIP, or Network Transport of RTCM via Internet Protocol, is a protocol for streaming RTK (Real Time Kinematic) corrections through an internet connection. <br>
 
 It is based on HTTP/1.1 protocol and is composed of:
@@ -208,7 +208,7 @@ This example requires :
 * an Arduino board or module with an internet connection and functionning uart port
 * a Septentrio receiver, make sure its baudrate and the one used in the code match
 * a uart connection between the Arduino and Septentrio receiver 
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/hardware_setup.jpg" width=354 height=266/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/hardware_setup.jpg" width=354 height=266/>
 
 
 #### How to adapt it for you
