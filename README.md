@@ -2,7 +2,7 @@
 
 # Septentrio Arduino Library
 
-<img align=right src=images/Logo.png width=225 height=225>
+<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/Logo.png" width=225 height=225>
 
 This Arduino library has been created to make Septentrio GNSS easier to use with Arduino hardware. <br>
 **Make sure that both the Arduino's and the receiver's baudrate match to use this library (keep in mind that the default baudrate for Septentrio is 115200 but it is not supported by AltSoftSerial used in some examples).**  <br> 
@@ -49,8 +49,8 @@ Eridano has been developped with the [official Arduino IDE](https://www.arduino.
 * Downloading the zip and importing it in the IDE (we would recommend putting it in your /library folder)
 You can then upload any of the examples through the IDE to the board.
 <br>
-<img align=left src="images/Include library.png" width=351 height=216>
-<img align=right src="images/Zip library.png" width=351 height=222>
+<img align=left src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/Include library.png" width=351 height=216>
+<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/Zip library.png" width=351 height=222>
 <br>
 <br>
 <br>
