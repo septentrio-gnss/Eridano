@@ -1,11 +1,25 @@
-# <center> Septentrio Arduino Library </center>
+<div align="center">
 
-<img align=right src=images/logo.png width=250 height=250>
+# Septentrio Arduino Library
+
+<img align=right src=images/Logo.png width=225 height=225>
 
 This Arduino library has been created to make Septentrio GNSS easier to use with Arduino hardware. <br>
 **Make sure that both the Arduino's and the receiver's baudrate match to use this library (keep in mind that the default baudrate for Septentrio is 115200 but it is not supported by AltSoftSerial used in some examples).**  <br> 
-\
-Author : chiara de Saint Giniez
+<br>
+
+## Authors 
+|Name                   | GitHub   |  
+|-----------------------|----------|
+| chiara de Saint Giniez| TODO     |
+
+## Maintainer 
+
+| GitHub |
+|--------|
+| <a href="https://github.com/septentrio-users">septentrio-users</a> </br> |  
+
+## DO YOU HAVE ANY QUESTIONS? CONTACT SEPTENTRIO SUPPORT TEAM
 
 ## Septentrio resources
 
@@ -13,45 +27,49 @@ Author : chiara de Saint Giniez
 | :-:                                                   | :-:                                                              | :-: |
 | [Septentrio home page](https://www.septentrio.com/en) | [Septentrio contact page](https://www.septentrio.com/en/contact) | [Septentrio resource page](https://www.septentrio.com/en/support) |
 
+</div>
 
 ### Table of contents
-* [Content of the library](#content-of-the-library)
-* [Examples](#examples)
+* [What is Eridano](#what-is-eridano)
 * [Installation](#installation)
+* [How to use guides](#how-to-use-guides)
 * [Credits](#credits)
 
-## <center> Content of the library
+## What is Eridano
+Eridano is an Arduino Library for Septentrio receivers, it allows communcation between Arduino products and Septentrio receivers. By using its examples or creating your own, you can use all sorts of features from Septentrio receivers with the major ones being: 
+* Parsing of SBF or NMEA
+* Logging
+* Corrections via NTRIP  
 
-Two classes are defined in this library:
-* **SEPTENTRIO_GNSS** for input and ouput limited to the receiver. 
-* **SEPTENTRIO_NTRIP** for all operations related to NTRIP (see the NTRIP Client example's folder for more explanations). A caster and port must be provided when initializing. It can function with NTRIP 1 and 2, and HTTP protocol.
-Both need a **two-way serial connection** to the receiver to be initialized and work correctly. 
+[Septentrio](https://www.septentrio.com) is a leading provider in high-level GNSS solution known for providing reliable and secure positionning technology all around the globe.
 
-A debug mode can be enabled for both by using the _enableDebug_ function and providing a port capable of displaying the messages (for instance the serial monitor).<br>
+## Installation
+Eridano has been developped with the [official Arduino IDE](https://www.arduino.cc/en/software). Once it has been installed, the library can be easily implemented through it by:
+* Importing the library via the IDE (not available yet, needs approval from community)
+* Downloading the zip and importing it in the IDE (we would recommend putting it in your /library folder)
+You can then upload any of the examples through the IDE to the board.
+<br>
+<img align=left src="images/Include library.png" width=351 height=216>
+<img align=right src="images/Zip library.png" width=351 height=222>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
-## <center> Examples </center>
-This library's examples have been tested with a Mosaic-go and Arduino Uno, and Arduino R4 WiFi for the NTRIP features. <br>  
-The examples use the Serial monitor but can be adapted to work without easily.  
-Some example use the __AltSoftSerial__ library with its __default pins__ (9 for tx and 8 for rx) at a baudrate of __9600__. This is not mandatory to use the library and was only done for testing purposes. However, you always need a **two-way serial connection** between Arduino and receiver.
+## How to use guides
+This open source projects provides user with two guides:
+* one for users describing all functionnalities
+* one for developpers, describing how the library is structured
 
-* read_PVTGeodetic : 
-    * display the PVTGeodetic data (see SBF block) in the serial monitor.
-    * This example can be easily adapted for all SBF blocks (see [this page](https://customersupport.septentrio.com/s/article/What-is-SBF-and-where-can-I-find-more-information-about-it) for reference)
-* read_GGA :
-    * Display GGA data in the serial monitor
-* write_command:
-    * Send commands to the receiver from the Serial monitor
-    * Can be used to send or get configuration or check that the receiver works correctly
-* log_PVTGeodetic : 
-    * not yet tested
-* ntrip_client : 
-    * creates an NTRIP client from the Arduino board and sends correction data to the receiver through serial
-    * This example requiers a WiFi connection to work
-
-For more information on each example, see their respective README files.
-
-## <center> Installation </center>
-This library is available in the official Arduino IDE. It can also be downloaded from this GitHub repository.
+The user manual aims to explain how to use the examples and adapt them to the user's need.  
+[Go to User Manual](./ressources/user_manual.md)  
+The developper manual aims to explain the logic behind the library for those who want to implement more features or keep the current ones up to date.  
+[Go to Developper Manual](./ressources/developper_manual.md)  
 
 ## <center> Credits </center>
-I would like to thank Nathan Seith and the Sparkfun team for allowing to use their [library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library/) for their u-blox modules as a inspiration for this library. 
+I would like to thank Nathan Seith and the Sparkfun team for allowing to use their [library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library/) for their u-blox modules as a inspiration for this library.

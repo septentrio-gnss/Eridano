@@ -1,7 +1,7 @@
 # Client NTRIP example #
 
 ## What is NTRIP ? ##
-<img align=right src="./NTRIP_diagram.png" width=330 height=200/>
+<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/NTRIP_diagram.png" width=330 height=200/>
 NTRIP, or Network Transport of RTCM via Internet Protocol, is a protocol for streaming RTK (Real Time Kinematic) corrections through an internet connection. <br>
 
 It is based on HTTP/1.1 protocol and is composed of:
@@ -21,7 +21,7 @@ This example requires :
 * a Septentrio receiver, make sure its baudrate and the one used in the code match
 * a uart connection between the Arduino and Septentrio receiver 
 
-<img align=center src="./hardware_setup.jpg" width=354 height=266/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/tree/ntripBranch/images/hardware_setup.jpg" width=354 height=266/>
 
 ### How it works ###
 This example is composed of two files:

@@ -116,17 +116,17 @@ void loop() {
     Serial.print(F("Reference ID : ")); 
     uint16_t refID=myGNSS.u2Conv(myGNSS.SBFBuffer, 76);
     if (refID!=doNotUseLong){Serial.println(refID);}
-    else {Serial.println("INVALID"));}
+    else {Serial.println(F("INVALID"));}
 
     Serial.print(F("Mean correction age : ")); 
     uint16_t meanCorrAge=myGNSS.u2Conv(myGNSS.SBFBuffer, 78);
     if (meanCorrAge!=doNotUseLong){Serial.println(meanCorrAge);}
-    else {Serial.println("INVALID"));}
+    else {Serial.println(F("INVALID"));}
 
     Serial.print(F("Signal info : "));
     uint64_t signalInfo=myGNSS.u4Conv(myGNSS.SBFBuffer, 80);
     if (signalInfo!=0) {Serial.println(TOW*1);}
-    else {Serial.println("F(INVALID"));}
+    else {Serial.println("F(INVALID");}
 
     Serial.print(F("Alert flag : ")); 
     uint8_t alertFlag=myGNSS.SBFBuffer->data[84];
