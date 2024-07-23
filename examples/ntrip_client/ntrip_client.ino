@@ -1,12 +1,11 @@
-/**
-*/
-
 #include <RingBuffer.h>
 #include <SoftwareSerial.h>
+
 #include <Septentrio_Arduino_driver.h>
 #include <septentrio_structs.h>
 #include <arduino_base64.hpp>
 #include "secrets.h"
+
 #include "WiFiS3.h"
 
 #define baudrate 9600
@@ -26,16 +25,17 @@ char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as k
 int keyIndex = 0;            // your network key index number (needed only for WEP)
 int status = WL_IDLE_STATUS;
 
-WiFiClient ntripClient;
 SEPTENTRIO_NTRIP myNTRIP;
+WiFiClient ntripClient;
 SoftwareSerial mySerial(rxPin, txPin);
 
 unsigned long start=millis();
+int index=0;
 
 void setup() {
   Serial.begin(baudrate);
   mySerial.begin(baudrate);
-  while (!Serial){;} 
+  while (!Serial){;} //comment if you use the Serial monitor, you need to comment all the Serial.print in the code also
 
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -55,9 +55,8 @@ void setup() {
     delay(3000); // wait for 3 seconds so as not to pound
   }
   Serial.println("Connected to WiFi");
+  myNTRIP.enableDebug(Serial);
 
-  //myNTRIP.enableDebug(Serial);
-  myNTRIP.connectToReceiver(mySerial);
   if (casterUser!="")
   {
     myNTRIP.ntripProperties->userCredent64 = new char[AUTH_MAX_SIZE];
@@ -68,43 +67,39 @@ void setup() {
   myNTRIP.ntripProperties->caster.Mountpoint=mountPoint;
   myNTRIP.ntripTempBuffer = new ntripTempBuffer_t;
   myNTRIP.ntripTempBuffer->data = new uint8_t[ntripHeaderMaxSize];
-  myNTRIP.ntripProperties->nmeaData = new char[nmeaMaxSize];
+  //myNTRIP.ntripProperties->nmeaData = new char[nmeaMaxSize];
   int ntripRequestMaxSize=requestStandardMaxSize+ (myNTRIP.ntripProperties->userCredent64!=nullptr)*RequestAuthMaxSize+ (myNTRIP.ntripProperties->nmeaData!=nullptr)*nmeaMaxSize+ (myNTRIP.ntripProperties->custom!=nullptr)*RequestCustomMaxSize;
   myNTRIP.ntripRequestBuffer = new char[ntripRequestMaxSize];
-  strncpy(myNTRIP.ntripProperties->nmeaData, "$GPGGA,070803.453,5050.913,N,00443.930,E,1,12,1.0,0.0,M,0.0,M,,*62", nmeaMaxSize); //back-up nmea
-  
+
+  //strncpy(myNTRIP.ntripProperties->nmeaData, "$GPGGA,070803.453,5050.913,N,00443.930,E,1,12,1.0,0.0,M,0.0,M,,*62", nmeaMaxSize);
   //Optionnal:
   //pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
-  if (!myNTRIP.ntripProperties->connected) //initialize connection message
-  {
-    /*if (!getCurrentGGA(5000))
-    {
-      Serial.println("WARNING : couldn't get the NMEA in time. The default ones will be used.");
-    }*/
-    myNTRIP.ntripProperties->connected = setupNtripClient();
-    
+  if (!myNTRIP.ntripProperties->connected)
+  { 
+    myNTRIP.ntripProperties->connected = setupNtripClient((millis()-start)<(2*rtcmTimeOut)); //initialize connection message
   }
   if (Serial)
   {
     if (!ntripClient.connected())
     {
-      ntripClient.connect(casterHost, casterPort); //connects to caster
+      ntripClient.connect(casterHost, casterPort); //sends request for gnss
     }
     if ((millis()-start)>rtcmTimeOut)
     {
-      ntripClient.write(myNTRIP.ntripRequestBuffer, strlen(myNTRIP.ntripRequestBuffer));  //sends request for correction in case of timeout
+      ntripClient.write(myNTRIP.ntripRequestBuffer, strlen(myNTRIP.ntripRequestBuffer));
       delay(100);
     } 
-    if (myNTRIP.ntripProperties->transferEncoding) //if transfer in chunks
+    if (myNTRIP.ntripProperties->transferEncoding) //for chunks
     {
       while (ntripClient.available()>0)
       {
         int chunkSize=getChunkSize();
-        /*Serial.print("Chunk : ");
-        Serial.println(chunkSize);*/
+        Serial.print("Chunk : ");
+        Serial.println(chunkSize);
+
         if (chunkSize!=0)
         {
           for (int i=0; i<chunkSize;i++)
@@ -124,14 +119,14 @@ void loop() {
         mySerial.write(ntripClient.read());
       }
     }
-    //if (Serial) {Serial.println("End of transmission");}
-    ntripClient.flush(); //flush all data to send only full messages
+    if (Serial) {Serial.println("End of transmission");}
+    ntripClient.flush();
     while (ntripClient.available()){ntripClient.read();}
   }
   delay(100);
 }
 
-bool setupNtripClient()
+bool setupNtripClient(bool useMountPoint)
 {
   bool connectionSuccess=false;
   if (!myNTRIP.ntripProperties->connected)
@@ -148,7 +143,7 @@ bool setupNtripClient()
       Serial.print(F(":"));
       Serial.println(casterPort);
       Serial.print(F("Will use the mountpoint : "));
-      Serial.println(mountPoint);
+      Serial.println(useMountPoint ? mountPoint : "");
       if (myNTRIP.ntripProperties->userCredent64!=nullptr)
       {
         Serial.print(F("Using credentials : "));
@@ -163,7 +158,7 @@ bool setupNtripClient()
         base64::encode(userCredentials, sizeof(userCredentials), myNTRIP.ntripProperties->userCredent64);
       }
 
-      myNTRIP.createRequestMsg(USER_AGENT);
+      myNTRIP.createRequestMsg(USER_AGENT, useMountPoint);
       Serial.println("Request message: ");
       Serial.println(myNTRIP.ntripRequestBuffer);
 
@@ -196,14 +191,31 @@ bool setupNtripClient()
       }
       else 
       {
+        Serial.println(ntripClient.available());
+        if (ntripClient.available()==0)
+        {
+          Serial.println("Failed !");
+          connectionSuccess=false;
+          myNTRIP.createRequestMsg(USER_AGENT, false);
+          ntripClient.write(myNTRIP.ntripRequestBuffer, strlen(myNTRIP.ntripRequestBuffer));
+          delay(100);
+          start=millis();
+          while (ntripClient.available()>0 && !connectionSuccess && (millis()-start)<replyTimeout)
+          {
+            connectionSuccess=myNTRIP.processAnswer(myNTRIP.ntripTempBuffer, ntripClient.read());
+          }
+          if (myNTRIP.ntripProperties->nmeaData!=nullptr)
+          {
+            delete[] myNTRIP.ntripRequestBuffer;
+            int ntripRequestMaxSize=requestStandardMaxSize+ (myNTRIP.ntripProperties->userCredent64!=nullptr)*RequestAuthMaxSize+ (myNTRIP.ntripProperties->nmeaData!=nullptr)*nmeaMaxSize+ (myNTRIP.ntripProperties->custom!=nullptr)*RequestCustomMaxSize;
+            myNTRIP.ntripRequestBuffer = new char[ntripRequestMaxSize];
+          }
+          connectionSuccess=false;
+        }
         //DIGITAL_WRITE(LED_BUILTIN, HIGH);
-        if (Serial)
+        else if (Serial)
         {
             Serial.println(F("Successfully connected to caster"));         
-        }
-        if (myNTRIP.ntripBuffer->contentType==sourcetable)
-        {
-          getmountPointRequierements(myNTRIP.ntripProperties->caster.Mountpoint);
         }
       }
     }
@@ -263,69 +275,4 @@ int getChunkSize()
   }
   return chunksize;
 
-}
-
-void getmountPointRequierements(const char *mountPoint) //myNTRIP.ntripProperties->caster.Mountpoint)
-{
-  char buffer[strlen(myNTRIP.ntripRequestBuffer)];
-  snprintf(buffer, strlen(buffer), "GET / HTTP/1.1\r\n"
-                  "Host: %s\r\n"
-                  "Ntrip-Version: Ntrip/%s\r\n"
-                  "User-Agent: %s\r\n"
-                  "Connection: close\r\n\r\n",
-                  myNTRIP.ntripProperties->caster.Host,
-                  myNTRIP.ntripProperties->ntripVer==0 ? "1.0" : (myNTRIP.ntripProperties->ntripVer==1 ? "1.1" : (myNTRIP.ntripProperties->ntripVer==2 ? "2.0" : "2.1")),
-                  USER_AGENT);
-  ntripClient.write(buffer, strlen(buffer));
-  delay(100);
-  while (ntripClient.available()>0)
-  {
-    myNTRIP.processAnswer(myNTRIP.ntripTempBuffer, ntripClient.read());
-  }
-}
-
-bool getCurrentGGA(unsigned int nmeaTimeOut)
-{
-  char msgBuffer[24];
-  bool nmeaAcquired=false;
-  int index=0;
-  unsigned int start;
-
-  mySerial.write("SSSSSSSSSS"); //get port and force commands
-  delay(100);
-  strncpy(msgBuffer, "exeNMEAOnce, ", 13); //create message
-  for (int i=0;i<4;i++)
-  {
-    msgBuffer[13+i]=mySerial.read();
-  }
-  while (Serial.available()>0) {Serial.read();}
-  strncpy(msgBuffer+13+3, ", GGA\r\n", 7);
-  Serial.println(msgBuffer);
-  while ((millis()-start)<nmeaTimeOut && !nmeaAcquired)
-  {
-    mySerial.write(msgBuffer); //send request
-    delay(100);
-    while (mySerial.available()>0 && !nmeaAcquired)
-    {
-      while (mySerial.read()!='\n'){;} //skip repeat in the first line
-
-      while (mySerial.read()!=','){;} //skip header
-
-      if (mySerial.peek()!=',') //make sure we have a valid nmea by checking time is not empty
-      {
-        strncpy(myNTRIP.ntripProperties->nmeaData, "$GPGGA,", 7);
-        int index=7;
-        while (mySerial.peek()!='\r')
-        {
-          myNTRIP.ntripProperties->nmeaData[index]=mySerial.read();
-        }
-        nmeaAcquired=true;
-      }
-      else
-      {
-        delay(250); //wait a bit for NMEA data to be computed
-      }
-    }
-  }
-  return nmeaAcquired;  
 }

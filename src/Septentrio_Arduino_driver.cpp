@@ -150,8 +150,7 @@ bool SEPTENTRIO_GNSS::canSendCommand(Stream &serialport, const String comPort, c
             offset = checkCommandResponse(SEPTENTRIO_GNSS::_serialPort->read(), offset);
             if (offset==3)
             {
-                auto cmd="setDataInOut, "+comPort+", CMD";
-                SEPTENTRIO_GNSS::_serialPort->write(("setDataInOut, "+comPort+", CMD").c_str()); //TODO: allow for different port
+                SEPTENTRIO_GNSS::_serialPort->write(("setDataInOut, "+comPort+", +CMD").c_str()); //TODO: allow for different port
                 return true;
             }
             if (offset==-1)
@@ -740,7 +739,7 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
     }
     else if ((tempBuffer->headerCount==0) && incomingByte!=messageId[0]) /** check for 'false positive' of new message while still processing a sentence, continue as before**/
     {
-        if (tempBuffer->sentenceType==SBF_SENTENCE)
+        if (tempBuffer->sentenceType==NMEA_SENTENCE)
         {
             tempBuffer->headerCount=9;
         }
@@ -765,13 +764,14 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
                 {
                     tempBuffer->properties.newData=true;
                     tempBuffer->sentenceType=SENTENCE_TYPE_UNDETERMINED;
-                    NMEABuffer->correctChecksum=checkChecksum(NMEABuffer);
+                    NMEABuffer->correctChecksum=false;
                     bufferFilled=true;
                     if (!customId)
                     {
                         if (checkId(NMEABuffer))
                         {
                             NMEABuffer->alreadyRead=0;
+                            NMEABuffer->correctChecksum=checkChecksum(NMEABuffer);
                         }
                     }
                     else
@@ -779,6 +779,7 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
                         if(checkCustomId(NMEABuffer, messageId))
                         {
                             NMEABuffer->alreadyRead=0;
+                            NMEABuffer->correctChecksum=checkChecksum(NMEABuffer);
                         }
                     }
                     tempBuffer->headerCount=-1;
@@ -1206,7 +1207,15 @@ bool SEPTENTRIO_NTRIP::processHeaderVer2(ntripTempBuffer_t *ntripTempBuffer, con
     }
     return ntripTempBuffer->contentType!=unknown;
 }
-
+bool SEPTENTRIO_NTRIP::getTransferEncoding(ntripTempBuffer_t *ntripTempBuffer)
+{
+    /**
+     * @brief check if the data will be transfered in chunks
+     * @param ntripTempBuffer the buffer containing the header to search
+     * @return if the data will be given in chunks
+     */
+    return strstr(reinterpret_cast<char*>(ntripTempBuffer->data), "Transfer-Encoding: chunked")!=nullptr;
+}
 CONTENT_TYPE_t SEPTENTRIO_NTRIP::getContentType(const ntripTempBuffer_t *ntripTempBuffer)
 {
     /**
@@ -1238,8 +1247,8 @@ int SEPTENTRIO_NTRIP::getContentLengh(const ntripTempBuffer_t *ntripTempBuffer)
 {
     /**
     * @brief Extracts the length of the sourcetable from the header
-    * @param ntripTempBuffer The buffer for the header
-    * @return The length of the sourcetable in byte (excluding ENDSOURCETABLE)
+    * @param ntripTempBuffer : the buffer for the header
+    * @return the length of the sourcetable in byte (excluding ENDSOURCETABLE)
     **/
     int contentLength=17;
     char contentLine[contentLength]="Content-Length: "; 
@@ -1266,14 +1275,46 @@ int SEPTENTRIO_NTRIP::getContentLengh(const ntripTempBuffer_t *ntripTempBuffer)
         return 0;
     }
 }
-bool SEPTENTRIO_NTRIP::getTransferEncoding(ntripTempBuffer_t *ntripTempBuffer)
+void SEPTENTRIO_NTRIP::extractSentence(const ntripBuffer_t *ntripBuffer)
 {
     /**
-     * @brief check if the data will be transfered in chunks
-     * @param ntripTempBuffer the buffer containing the header to search
-     * @return if the data will be given in chunks
-     */
-    return strstr(reinterpret_cast<char*>(ntripTempBuffer->data), "Transfer-Encoding: chunked")!=nullptr;
+    * @brief Identifies, extract and processes sentence types from a source table
+    * @param ntripBuffer : the buffer in which the sourcetable's data is stored
+    */
+    uint8_t subSentence[200]; //TODO
+    int sentenceSize;
+    int i=0;
+    for (i=0;i<ntripBuffer->offset;i++)
+    {
+        sentenceSize=0;
+        while (ntripBuffer->data[i+sentenceSize]!='\r' && ntripBuffer->data[i+sentenceSize+1]!='\n' && (i+sentenceSize)<ntripBuffer->offset)
+        {
+            sentenceSize++;
+        }
+        sentenceSize+=2; //+2 for \r and \n;
+        memcpy(subSentence, &ntripBuffer->data[i], sentenceSize);
+        //process sentence
+        if (subSentence[0]=='S' && subSentence[1]=='T' && subSentence[2]=='R')
+        {
+            if (_printDebug)
+            {processSTR(subSentence);}
+            if (strstr(reinterpret_cast<const char*>(subSentence), reinterpret_cast<const char*>(ntripProperties->caster.Mountpoint))!=nullptr)
+            {
+                casterRequirement(subSentence);
+            }
+        }
+        else if (subSentence[0]=='N' && subSentence[1]=='E' && subSentence[2]=='T')
+        {
+            if (_printDebug)
+            {processNET(subSentence);}
+        }
+        else if (subSentence[0]=='C' && subSentence[1]=='A' && subSentence[2]=='S')
+        {
+            if (_printDebug)
+            {processCAS(subSentence);}
+        }
+        i+=sentenceSize;
+    }
 }
 void SEPTENTRIO_NTRIP::processCAS(const uint8_t *buffer, const int customField=0)
 {
@@ -1662,45 +1703,73 @@ void SEPTENTRIO_NTRIP::processSTR(const uint8_t *buffer, int customField=0)
         }
     }
 }
-void SEPTENTRIO_NTRIP::extractSentence(const ntripBuffer_t *ntripBuffer)
+void SEPTENTRIO_NTRIP::casterRequirement(const uint8_t buffer[200])
 {
     /**
-    * @brief Identifies, extract and processes sentence types from a source table
-    * @param ntripBuffer The buffer in which the sourcetable's data is stored
-    */
-    uint8_t subSentence[200]; //TODO
-    int sentenceSize;
-    int i=0;
-    for (i=0;i<ntripBuffer->offset;i++)
+     * @brief creates buffers for authentication or nmea if needed (mind authentication will not be filled if nothing was given)
+     * @param buffer the buffer containing the data for the caster
+     */
+    int commaCount=0;
+    int index=0;
+    if (_printDebug)
     {
-        sentenceSize=0;
-        while (ntripBuffer->data[i+sentenceSize]!='\r' && ntripBuffer->data[i+sentenceSize+1]!='\n' && (i+sentenceSize)<ntripBuffer->offset)
+        _debugPort->println("Found the caster's mountpoint");
+    }
+    while (commaCount<11)
+    {
+        if (buffer[index]==',')
         {
-            sentenceSize++;
+            index++;
+            commaCount++;
         }
-        sentenceSize+=2; //+2 for \r and \n;
-        memcpy(subSentence, &ntripBuffer->data[i], sentenceSize);
-        //process sentence
-        if (subSentence[0]=='S' && subSentence[1]=='T' && subSentence[2]=='R')
+    }
+    if (buffer[index]=='1' && ntripProperties->nmeaData==nullptr)
+    {
+        ntripProperties->nmeaData = new char[nmeaMaxSize];
+        ntripProperties->nmeaData[0]='\0';
+        if (_printDebug)
         {
-            if (_printDebug)
-            {processSTR(subSentence);}
-            if (strstr(reinterpret_cast<const char*>(subSentence), reinterpret_cast<const char*>(ntripProperties->caster.Mountpoint))!=nullptr)
+            _debugPort->println("In need of NMEA, receiver will be asked for GGA");
+        }
+        char temp[22];
+        snprintf(temp, 22, "exeNMEAOnce,%s,GGA\r\n", _portName);
+        SEPTENTRIO_NTRIP::_serialPort->write("SSSSSSSSSS");
+        SEPTENTRIO_NTRIP::_serialPort->write(temp);
+        delay(100);
+        auto start=millis();
+        index=0;
+        while (SEPTENTRIO_NTRIP::_serialPort->available()>0 && (millis()-start)<3000)
+        {
+            while (SEPTENTRIO_NTRIP::_serialPort->peek()!='$')
             {
-                casterRequirement(subSentence); //check requirement of the current caster mountpoint
+                ntripProperties->nmeaData[index]=_serialPort->read();
+                index++;
+            }
+            if (_serialPort->read()=='$' && _serialPort->read()=='@' && _serialPort->read()=='?')
+            {
+                if (_printDebug)
+                {
+                    _debugPort->println("Asking for GGA not wokring");
+                }
             }
         }
-        else if (subSentence[0]=='N' && subSentence[1]=='E' && subSentence[2]=='T')
+    }
+    while (commaCount<14)
+    {
+        if (buffer[index]==',')
         {
-            if (_printDebug)
-            {processNET(subSentence);}
+            index++;
+            commaCount++;
         }
-        else if (subSentence[0]=='C' && subSentence[1]=='A' && subSentence[2]=='S')
+    }
+    if (buffer[index]=='B' && ntripProperties->userCredent64==nullptr)
+    {
+        ntripProperties->userCredent64 = new char[RequestAuthMaxSize];
+        ntripProperties->userCredent64[0]='\0';
+        if (_printDebug)
         {
-            if (_printDebug)
-            {processCAS(subSentence);}
+            _debugPort->println("In need of basic authentication, please provide some and restart the program");
         }
-        i+=sentenceSize;
     }
 }
 

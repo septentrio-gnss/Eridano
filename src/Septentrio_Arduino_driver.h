@@ -15,11 +15,13 @@ constexpr int requestStandardMaxSize=500;
 constexpr int RequestAuthMaxSize=50; //TODO: check
 constexpr int RequestCustomMaxSize=100; //Added for potential other requirements of the ntrip caster
 
+//Do-not-use values
 constexpr long doNotUseTOW = 4294967295;
 constexpr int doNotUseLong = 65535;
 constexpr int doNotUseInt = 255;
 constexpr float doNotUseFloat = -2e10;
 
+//maximum possible revision of SBF data (as of July 2024)
 constexpr int maxVersion = 3;
 
 class SEPTENTRIO_GNSS
@@ -35,6 +37,7 @@ class SEPTENTRIO_GNSS
         //destructor
         virtual ~SEPTENTRIO_GNSS();
 
+        //receiver setup
         bool begin(Stream &serialport, const uint16_t maxWait=5000);
         bool isConnected(const uint16_t maxWait);
         bool canSendCommand(Stream &serialport, const String comPort, const uint16_t maxWait=5000);

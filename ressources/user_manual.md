@@ -1,9 +1,10 @@
-# User manual 
+# <center> User manual 
+---
 
 ## <center> Content of the library
 
 Two classes are defined in this library:
-* **SEPTENTRIO_GNSS** for input and ouput limited to the receiver. 
+* **SEPTENTRIO_GNSS** for general input and ouput limited to the receiver. 
 * **SEPTENTRIO_NTRIP** for all operations related to NTRIP (see the NTRIP Client example's folder for more explanations). A caster and port must be provided when initializing. It can function with NTRIP 1 and 2, and HTTP protocol.
 Both need a **two-way serial connection** to the receiver to be initialized and work correctly. 
 
@@ -28,10 +29,17 @@ Some example use the __AltSoftSerial__ library with its __default pins__ (9 for 
     * creates an NTRIP client from the Arduino board and sends correction data to the receiver through serial
     * This example requiers a WiFi connection to work
 
-For more information on each example, see their respective README files.
-
-
+---
 ## Detailed explanations
+---
+### Table of content
+| Example | Sub-section |
+| :--     | :--         |
+| [Writing commands](#writing-commands) | * [What this example does](#what-this-example-does) <br> * [Resource on command](#resources) <br> * [How to adapt it for you](#how-to-adapt-it-for-you) |
+| [Reading PVTGeodetic](#reading-pvtgeodetic) | * [What this example does](#what-this-example-does-1) <br> * [Learn more about SBF](#learn-more-about-sbf) <br> * [The PVTGeodetic message](#the-pvtgeodetic-message) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-1) |
+| [Reading GNGGA](#reading-gngga) | * [What this example does](#what-this-example-does-2) <br> * [The NMEA message](#the-nmea-message) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-2) |
+| [Logging PVTGeodetic](#logging-pvtgeodetic) | * [What this example does](#what-this-example-does-3) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-3)
+| [Client NTRIP](#client-ntrip-example) |* [What is NTRIP](#what-is-ntrip) <br> * [What this example does](#what-this-example-does-4) <br> * [Hardware setup](#hardware-setup) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-4) |
 
 ### Writing commands
 #### Table of content 
@@ -51,9 +59,9 @@ You can learn how to find a list of the commands for your receiver [here](https:
 You can simply have the commands be part of the code and not input. You can also easily reuse this feature in other code to configure your receiver.
 
 [Back to top](#user-manual)
-<br>
 
-### Read PVTGeodetic
+---
+### Reading PVTGeodetic
 #### Table of contents
 * [What this example does](#what-this-example-does-1)  
 * [Learn more about SBF](#learn-more-about-sbf)  
@@ -123,9 +131,9 @@ You will first need to know the structure of the SBF message you want to parse f
 Afterwards, you only need to use the conversion functions for the different data types (called [name_of_type]Conv) or extract the bits. 
 
 [Back to top](#user-manual)
-<br>
 
-### Example : Reading GNGGA 
+---
+### Reading GNGGA 
 #### Table of content
 * [What this example does](#what-this-example-does-2)  
 * [The NMEA message](#the-nmea-message)  
@@ -165,14 +173,29 @@ You only need to change the ID in *checkNewByte* to get a different type of NMEA
 Mind that the buffer alloted is only 82 bytes long, if you're using bigger messages you will need to change *nmeaMaxSize* in Septentrio_Arduino_driver.h.
 
 [Back to top](#user-manual)
-<br>
 
+---
+
+### Logging PVTGeodetic
+#### Table of content
+* [What this example does](#what-this-example-does-3)  
+* [How to adapt it for you](#how-to-adapt-it-for-you-3)
+
+#### What this example does
+This example will log incoming data from the receiver with the PVTGeodetic ID to SD card on the Arduino board. It will first check  that the message is correct, ie. not do-not-use times and correctCRC, plus correct ID.
+#### How to adapt it for you
+This example could also be adapted to NMEA messages by changing the ID of *checkNewByte* (and set the optional parameter to true if needed).
+As is, this example can't be used for multiple message ID as *checkNewByte* only accepts one ID.
+
+[Back to top](#user-manual)
+
+---
 ### Client NTRIP example
 #### Table of content
 * [What is NTRIP](#what-is-ntrip)  
-* [What this example does](#what-this-example-does-3)  
+* [What this example does](#what-this-example-does-4)  
 * [Hardware setup](#hardware-setup)  
-* [How to adapt it for you](#how-to-adapt-it-for-you-3)  
+* [How to adapt it for you](#how-to-adapt-it-for-you-4)  
 
 #### What is NTRIP?
 <img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/NTRIP_diagram.png" width=330 height=200/>
@@ -199,7 +222,11 @@ NMEA has its own maximum size of 100 bytes, independently of other parameters.
 
 #### What this example does 
 
-This example has been tested with an Arduino Uno R4 WiFi but should be usable with any Arduino hardware with minimal modification. This example connects to a WPA2 network, you might need to modify the WiFi connection in the example if another type is used. Correction will be passed directly to the receiver once the connexion is established and messages are received.
+This example has been tested with an Arduino Uno R4 WiFi but should be usable with any Arduino hardware with minimal modification. <br> 
+This example connects to a WPA2 network, you might need to modify the WiFi connection in the example if another type is used. It will then connect to an NTRIP caster using the data provided by the user in *secrets.h*. Correction from the NTRIP will then be passed directly to the receiver once the connexion is established and messages are received. <br>
+This example has a secrets.h file containing the different data needed for the connection (at the very minimum, the WiFi IP and password) which can be freely modified by the user. A default NMEA string is also set in the .ino file to setup the connection without having to wait for the receiver, you can either disable it or add lines to get it from the receiver with the *exeNMEAOnce, YourPort, GGA* command. <br>
+*Note:* If you are unsure if you need GGA, I would suggest setting it up even with approximate data. <br>
+<br>
 This program can also be run with a debug mode to use with a monitor (ex. the Serial Monitor).
 
 #### Hardware setup

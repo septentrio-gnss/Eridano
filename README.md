@@ -1,6 +1,6 @@
 <div align="center">
 
-# Septentrio Arduino Library
+# Eridano: Septentrio Arduino Library
 
 <img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Logo.png" width=225 height=225>
 
@@ -11,7 +11,7 @@ This Arduino library has been created to make Septentrio GNSS easier to use with
 ## Authors 
 |Name                   | GitHub   |  
 |-----------------------|----------|
-| chiara de Saint Giniez| TODO     |
+| chiara de Saint Giniez| [chiara-septentrio](https://github.com/chiara-septentrio)|
 
 ## Maintainer 
 
