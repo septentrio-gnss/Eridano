@@ -47,8 +47,8 @@ The most common NTRIP errors have special instruction but otherwise a list of th
 ## NTRIP connection
 
 The NTRIP example is the most intricate of the library. You can take a look at the [user manual](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/user_manual.md) for a general explanation of NTRIP. This part aims to explain the workflow of the example, starting with a general overview:<br>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_general_workflow.jpg" height="75%" width="75%"> <br> <br>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_general_workflow_portait.jpg"> <br> <br>
 This example uses the HTTP protocol. The user first has to provide different inputs to fill the request message. Connection is done thanks to the WiFi library of Arduino and needs to be adapted for each boards. Once connection has been established, the request buffer is sent. <br>
 Once the response has been received, the program first checks for a success code ('200'); if it finds it, it then checks for NTRIP version through the syntax of the 200 response and extract the relevant data from the header; otherwise, if debug is enabled the error code is printed and no further process is done.
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_header_processing.jpg" height="75%" width="75%">
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_content_processing.jpg" height="75%" width="75%">
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_general_workflow_portrait.jpg">
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_content_processing.jpg">
