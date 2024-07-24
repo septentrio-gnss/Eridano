@@ -40,8 +40,9 @@ Some example use the __AltSoftSerial__ library with its __default pins__ (9 for 
 | [Reading GNGGA](#reading-gngga) | * [What this example does](#what-this-example-does-2) <br> * [The NMEA message](#the-nmea-message) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-2) |
 | [Logging PVTGeodetic](#logging-pvtgeodetic) | * [What this example does](#what-this-example-does-3) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-3)
 | [Client NTRIP](#client-ntrip-example) |* [What is NTRIP](#what-is-ntrip) <br> * [What this example does](#what-this-example-does-4) <br> * [Hardware setup](#hardware-setup) <br> * [How to adapt it for you](#how-to-adapt-it-for-you-4) |
+---
 
-### Writing commands
+### <center> Writing commands </center>
 #### Table of content 
 * [What this example does](#what-this-example-does)  
 * [Resource on command](#resources)  
@@ -61,7 +62,7 @@ You can simply have the commands be part of the code and not input. You can also
 [Back to top](#user-manual)
 
 ---
-### Reading PVTGeodetic
+### <center> Reading PVTGeodetic </center>
 #### Table of contents
 * [What this example does](#what-this-example-does-1)  
 * [Learn more about SBF](#learn-more-about-sbf)  
@@ -91,16 +92,16 @@ The structure of the SBF blobk is the following:
 | 10          | WNc        | 1 week           | 2 bytes unsigned integer | GPS week number associated with the TOW, WNc is a continuous week count. It is not affected by GPS rollovers which occur every 1024 weeks. <br> DO-NOT-USE value is : **65535**|
 | 14          | Mode       |                  | 1 byte unsigned integer  | Bit field indicating the PVT mode, as follows : <ul> <li> Bits 0-3 : types of PVT solution <br> <ul> <li> 0 : no GNSS PVT available </li> <li> 1 : Stand-Alone PVT</li> <li> 2 : Differential PVT </li> <li> 3 : Fixed location </li> <li> 4 : RTK with fixed ambiguities </li> <li> 5 : RTK with float ambiguities </li> <li> 6 : SBAS aided PVT</li> <li> 7 : Moving-base RTK with fixed ambiguities </li> <li> 8 : Moving-base RTK with float ambiguities </li> <li> 9 : Reserved </li> <li> 10 : Precise Point Positioning (PPP) </li> <li> 11 : Reserved </li> </ul> </li> <li> Bits 4-5 : Reserved </li> <li> Bit 6 : Set if the user has entered the command **setPVTMode, Static, , auto** and the receiver is still in the process of deermining its fixed position </li> <li> Bit 7 : 2D/3D flag : set in 2D mode (height assumed constant and not computed) </li> </ul> |
 | 15           | Error    |                   | 2 bytes unsigned integer | PVT error code : <ul> <li> 0 : No error </li> <li> 1 : Not enough measurement </li> <li> 2 : Not enough ephemerides available </li> <li> 3 : DOP too large (larger than 15) </li> <li> 4 : Sum of squared residuals too large </li> <li> 5 : No convergence </li> <li> 6 : Not enough measurements after outlier rejections </li> <li>  7 : Position output prohibited due to export laws <li> <li> 8 :  Base station coordinates unavailable </li> <li> 10 : Ambiguities not fixed and user requested only to output RTK-fixed positions |
-| 16          | Latitude   | 1 rad            | 8 bytes IEEE float       | Latitude, from -&pi/2 to +&pi/2, positive North of Equator. <br> DO-NOT-USE value is : **-2.10^{-2}** |
-| 24          | Longitude  | 1 rad            | 8 bytes IEEE float       | Longitude, from -&pi to +&pi, positive East of Greenwich. <br> DO-NOT-USE value is : **-2.10^{-2}** . |
-| 32          | Height     | 1 m              | 8 bytes IEEE float       | Ellipsoidal height, with respect to the ellipsoid specified by _*Datum*_ <br> DO-NOT-USE value is : **-2.10^{-2}** . |
-| 40          | Undulation | 1 m              | 4 bytes IEEE float       | Geoid undulation. <br> DO-NOT-USE value is : **-2.10^{-2}** .|
-| 44          | V_n        | 1 m/s            | 4 bytes IEEE float       | Velocity in the North direction. <br> DO-NOT-USE value is : **-2.10^{-2}** .|
-| 48          | V_e        | 1 m/s            | 4 bytes IEEE float       | Velocity in the East direction. <br> DO-NOT-USE value is : **-2.10^{-2}** .| 
-| 52          | V_u        | 1 m/s            | 4 bytes IEEE float       | Velocity in the 'Up' direction. <br> DO-NOT-USE value is : **-2.10^{-2}** .|
-| 56          | COG        | 1 degree         | 4 bytes IEEE float       | Course Over Ground : angle of the vehicle with respect to the local level north, ranging from 0 to 360, and increasing toward the east. Set to the do-not-use value when speed is lower than 0.1 m/s. <br> DO-NOT-USE value is : **-2.10^{-2}** .|
-| 60          | RxClkBias  | 1 ms             | 8 bytes IEEE float       | Receiver clock bias relative to the system time reported in the *_TimeSystem*_ field. Positive when the receiver time is ahead of the system time. <br> DO-NOT-USE value is : **-2.10^{-2}** .|
-| 68          | RxClkDrift | 1 ppm            | 4 bytes IEEE float       | Receiver clock bias relative to the GNSS system time (relative frequency error). Positive when the receiver clock runs faster than the system time. <br> DO-NOT-USE value is : **-2.10^{-2}** .|
+| 16          | Latitude   | 1 rad            | 8 bytes IEEE float       | Latitude, from -$pi$/2 to +$pi$/2, positive North of Equator. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** |
+| 24          | Longitude  | 1 rad            | 8 bytes IEEE float       | Longitude, from -$pi$ to +$pi$, positive East of Greenwich. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** . |
+| 32          | Height     | 1 m              | 8 bytes IEEE float       | Ellipsoidal height, with respect to the ellipsoid specified by _*Datum*_ <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** . |
+| 40          | Undulation | 1 m              | 4 bytes IEEE float       | Geoid undulation. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
+| 44          | V_n        | 1 m/s            | 4 bytes IEEE float       | Velocity in the North direction. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
+| 48          | V_e        | 1 m/s            | 4 bytes IEEE float       | Velocity in the East direction. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .| 
+| 52          | V_u        | 1 m/s            | 4 bytes IEEE float       | Velocity in the 'Up' direction. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
+| 56          | COG        | 1 degree         | 4 bytes IEEE float       | Course Over Ground : angle of the vehicle with respect to the local level north, ranging from 0 to 360, and increasing toward the east. Set to the do-not-use value when speed is lower than 0.1 m/s. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
+| 60          | RxClkBias  | 1 ms             | 8 bytes IEEE float       | Receiver clock bias relative to the system time reported in the *_TimeSystem*_ field. Positive when the receiver time is ahead of the system time. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
+| 68          | RxClkDrift | 1 ppm            | 4 bytes IEEE float       | Receiver clock bias relative to the GNSS system time (relative frequency error). Positive when the receiver clock runs faster than the system time. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
 | 72          | TimeSystem |                  | 1 byte unsigned integer  | Time system to which the offset is provided in this sub-block. <ul> <li> 0 : GPS time </li> <li> 1 : Galileo time <li> <li> 3 : GLONASS time </li> <li> 4 : Beidou time </li> <li> 5 : QZSS time </li> <li> 100 : Fugro AtomiChron time </li> </ul> <br> DO-NOT-USE value is : **255** .|
 | 73          | Datum      |                  | 1 byte unsigned integer  | This field defines in which datum the coordinates are expressed : <ul> <li> 0 : WGS84/ITRS </li> <li> 19 : Datum equal to that used by  the DGNSS/RTK base station </li> <li> 30 : ETRS89 (ETRF2000 serialization) </li> <li> 31 : NAD83(2011), North american datum (2011)</li> <li> 32 : NAD83(PA11), North american datum, Pacific plate </li> <li> 33 : NAD83(MA11), North american datum, Marianas plate </li> <li> 34 : GDA94(2010), Geocentric datum of Australia (2010) </li> <li> GDA2020, Geocentric datum of Australia (2020) </li> 36 : JGD2011, Japanese geodetic datum 2011 </li> <li> 250 : First user-defined datum </li> <li> 251 : Second user-defined datum </li> </ul> <br> DO-NOT-USE value is : **255** .|
 | 74          | NrSv       |                  | 1 byte unsigned integer  | Total number of satelites used in the PVT computation. <br> DO-NOT-USE value is : **255** .|
@@ -133,7 +134,7 @@ Afterwards, you only need to use the conversion functions for the different data
 [Back to top](#user-manual)
 
 ---
-### Reading GNGGA 
+### <center> Reading GNGGA </center>
 #### Table of content
 * [What this example does](#what-this-example-does-2)  
 * [The NMEA message](#the-nmea-message)  
@@ -176,7 +177,7 @@ Mind that the buffer alloted is only 82 bytes long, if you're using bigger messa
 
 ---
 
-### Logging PVTGeodetic
+### <center> Logging PVTGeodetic </center>
 #### Table of content
 * [What this example does](#what-this-example-does-3)  
 * [How to adapt it for you](#how-to-adapt-it-for-you-3)
