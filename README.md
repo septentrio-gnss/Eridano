@@ -67,9 +67,19 @@ This open source projects provides user with two guides:
 * one for developpers, describing how the library is structured
 
 The user manual aims to explain how to use the examples and adapt them to the user's need.  
-<center> [Go to User Manual](./ressources/user_manual.md) </center>
+<div align="center"> 
+
+| [Go to User Manual](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/user_manual.md) |
+|---|
+
+ </div>
 The developper manual aims to explain the logic behind the library for those who want to implement more features or keep the current ones up to date.  
-<center> [Go to Developper Guide](./ressources/developper_guide.md) </center>
+<div align="center"> 
+
+| [Go to Developper Guide](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/developper_guide.md) |
+|---| 
+
+</div>
 
 ## <center> Credits </center>
 I would like to thank Nathan Seith and the Sparkfun team for allowing to use their [library](https://github.com/sparkfun/SparkFun_u-blox_GNSS_Arduino_Library/) for their u-blox modules as a inspiration for this library.
