@@ -54,6 +54,6 @@ If the connexion is successfull, the program then checks for data type and will 
 When data stops being sent, the program checks that the connexion still exist (and re-establish it otherwise) and sends the request again if the timeout limit has passed. If it still doesn't work, the program will try double-checking mountpoint requirements and ajusting if possible.
 <br clear="left"/>
 <p>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_header_processing_portrait.jpg" width="55%" height="55%"/>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_content_processing_portrait.jpg" width="65%" height="65%"/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_header_processing_portrait.jpg" width="38%" height="38%"/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_content_processing_portrait.jpg" width="60%" height="60%"/>
 </p>
