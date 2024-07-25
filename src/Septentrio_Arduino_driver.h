@@ -72,7 +72,7 @@ class SEPTENTRIO_GNSS
         void fillBuffer(sbfBuffer_t *buffer, const uint8_t incomingByte);
         void fillBuffer(nmeaBuffer_t *buffer, const uint8_t incomingByte);
         bool checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incomingByte, const uint16_t messageID);
-        bool checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incomingByte, const char* messageId, bool customId=false);
+        bool checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incomingByte, const char* messageId);
         bool fullBuffer(const sbfBuffer_t *buffer);
         void fillSBFProperties(sbfBuffer_t *buffer, const uint16_t messageID);
 

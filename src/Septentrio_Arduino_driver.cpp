@@ -499,11 +499,11 @@ bool SEPTENTRIO_GNSS::checkId(nmeaBuffer_t *buffer)
     * @return Whether the buffer's ID is valid or not
     **/
     bool validId=false;
-    if (buffer->data[1]=='G' || buffer->data[1]=='*')
+    if (buffer->data[1]=='G')
     {
-        if ((buffer->data[2]=='P' || buffer->data[2]=='N' || buffer->data[2]=='L' || buffer->data[2]=='A' || buffer->data[2]=='B' || buffer->data[2]=='I' || buffer->data[2]=='Q') || buffer->data[2]=='*')
+        if ((buffer->data[2]=='P' || buffer->data[2]=='N' || buffer->data[2]=='L' || buffer->data[2]=='A' || buffer->data[2]=='B' || buffer->data[2]=='I' || buffer->data[2]=='Q'))
         {
-            if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='a')
+            if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='A')
             {
                 validId=true;
             }
@@ -511,14 +511,14 @@ bool SEPTENTRIO_GNSS::checkId(nmeaBuffer_t *buffer)
     }
     else if(buffer->data[1]=='B' && buffer->data[2]=='D') 
     {
-        if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='a')
+        if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='A')
         {
             validId=true;
         }
     }
     else if (buffer->data[1]=='I' && buffer->data[2]=='N')
     {
-        if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='a')
+        if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='A')
         {
             validId=true;
         }
@@ -544,7 +544,7 @@ bool SEPTENTRIO_GNSS::checkCustomId(const nmeaBuffer_t *buffer, const char *cust
     bool validId=true;
     for (int i=0;idSize; i++)
     {
-        validId*=(buffer->data[i+1]==customId[i]);
+        validId*=(buffer->data[i+1]==customId[i] || customId[i]=='*');
     }
     return validId;
 }
@@ -696,7 +696,7 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
     }
     return bufferFilled;
 }
-bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incomingByte, const char* messageId, bool customId)
+bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incomingByte, const char* messageId="*****")
 {
     /**
      * @brief For NMEA messages : checks new byte and stores it or not according to the data's validity and if the message is the desired type
@@ -711,10 +711,10 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
     {
         tempBuffer->headerCount=0;
     }
-    else if ((incomingByte==messageId[0]) && (tempBuffer->headerCount==0)) 
+    else if ((tempBuffer->headerCount==0) && (incomingByte=='G' || incomingByte=='B' || incomingByte=='I')) 
     {
         tempBuffer->sentenceType==NMEA_SENTENCE;
-        tempBuffer->data[0]=0x24; //check correct type
+        tempBuffer->data[0]=0x24; 
         tempBuffer->data[1]=incomingByte;
         tempBuffer->headerCount++;
         if (tempBuffer->properties.newData==false) //if previous message wasn't finished
@@ -737,7 +737,7 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
             }
         }     
     }
-    else if ((tempBuffer->headerCount==0) && incomingByte!=messageId[0]) /** check for 'false positive' of new message while still processing a sentence, continue as before**/
+    else if ((tempBuffer->headerCount==0) && !(incomingByte=='G' || incomingByte=='B' || incomingByte=='I')) /** check for 'false positive' of new message while still processing a sentence, continue as before**/
     {
         if (tempBuffer->sentenceType==NMEA_SENTENCE)
         {
@@ -748,7 +748,6 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
             tempBuffer->headerCount=-1;
         }
     }
-
     if (tempBuffer->sentenceType==NMEA_SENTENCE) /**Process NMEA message in nmea buffer**/
     {
         if (NMEABuffer!=nullptr) /**Fill the NMAE buffer**/
@@ -766,7 +765,7 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
                     tempBuffer->sentenceType=SENTENCE_TYPE_UNDETERMINED;
                     NMEABuffer->correctChecksum=false;
                     bufferFilled=true;
-                    if (!customId)
+                    if (messageId=="*****")
                     {
                         if (checkId(NMEABuffer))
                         {
@@ -1807,8 +1806,6 @@ bool SEPTENTRIO_NTRIP::rtpStartTransferToCastersMsg(char* sessionNum, const char
     "\r\n",
     userHost, userMountpoint ? userMountpoint : "",
     sessionNum);
-    int sizeBufferFilled;
-    for (sizeBufferFilled=0; msgBuffer!=0 && sizeBufferFilled<550; sizeBufferFilled++){;}
     return writtenBytes<sizeof(ntripRequestBuffer);
 }
 bool SEPTENTRIO_NTRIP::rtpEndTransferToCasterMsg(const char* userHost, const char *sessionNum, const char *userMountpoint=nullptr)
@@ -1827,8 +1824,6 @@ bool SEPTENTRIO_NTRIP::rtpEndTransferToCasterMsg(const char* userHost, const cha
     userHost, userMountpoint ? userMountpoint : "",
     sessionNum
     );
-    int sizeBufferFilled;
-    for (sizeBufferFilled=0; msgBuffer!=0 && sizeBufferFilled<550; sizeBufferFilled++){;}
     return writtenBytes<sizeof(ntripRequestBuffer);
 }
 

@@ -242,5 +242,5 @@ This example requires :
 #### How to adapt it for you
 You can adapt to any WiFi that could be supported by your Arduino board. The same way, you can adapt to any NTRIP caster that used no or basic authentication.  
 If you only want to get the sourcetable, you can leave the mountpoint empty and display the incoming data.
-
+The NTRIP class also has the functions to create the request for RTP connection but no example has been made with it.
 [Back to top](#user-manual)
