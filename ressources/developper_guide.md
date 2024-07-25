@@ -26,7 +26,9 @@ This class contains:
 * the functions to enable and disable debug mode
 
 Here is how messages are processed in checkNewByte:
+<center> SBF version </center>
 ![SBF flow process](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/SBF_byteFlow.jpg)
+<center> NMEA version </center>
 ![NMEA flow process](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/NMEA_byteFlow.jpg)
 
 ## NTRIP connection
