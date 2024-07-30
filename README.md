@@ -40,15 +40,15 @@ This library is not officially supported by Septentrio however Septentrio can pr
 * [Credits](#credits)
 
 ## What is Eridano
-Eridano is an Arduino Library for Septentrio GNSS receivers, it allows communcation between Arduino products and Septentrio receivers. By using its examples or creating your own, you can use all sorts of features from Septentrio receivers with the major ones being: 
+Eridano is an Arduino Library for Septentrio GNSS receivers, it allows communication between Arduino products and Septentrio receivers. By using its examples or creating your own, you can use all sorts of features from Septentrio receivers with the major ones being: 
 * Parsing of SBF or NMEA
 * Logging
 * Corrections via NTRIP  
 
-[Septentrio](https://www.septentrio.com) is a leading provider in high-level GNSS solution known for providing reliable and secure positionning technology all around the globe.
+[Septentrio](https://www.septentrio.com) is a leading provider in high-level GNSS solution known for providing reliable and secure positioning technology all around the globe.
 
 ## Installation
-Eridano has been developped with the [official Arduino IDE](https://www.arduino.cc/en/software). Once it has been installed, the library can be easily implemented through it by:
+Eridano has been developed with the [official Arduino IDE](https://www.arduino.cc/en/software). Once it has been installed, the library can be easily implemented through it by:
 * A: Importing the library via the IDE (only available after approval from community)
 * B: Downloading the zip and importing it in the IDE (we would recommend putting it in your /library folder)
 You can then upload any of the examples through the IDE to the board.
@@ -61,8 +61,8 @@ You can then upload any of the examples through the IDE to the board.
 
 ## How to use guides
 This open source projects provides user with two guides:
-* one for users describing all functionnalities
-* one for developpers, describing how the library is structured
+* one for users describing all functionalities
+* one for developers, describing how the library is structured
 
 The user manual aims to explain how to use the examples and adapt them to the user's need.  
 <div align="center"> 
@@ -71,10 +71,10 @@ The user manual aims to explain how to use the examples and adapt them to the us
 |---|
 
  </div>
-The developper manual aims to explain the logic behind the library for those who want to implement more features or keep the current ones up to date.  
+The developer manual aims to explain the logic behind the library for those who want to implement more features or keep the current ones up to date.  
 <div align="center"> 
 
-| [Go to Developper Guide](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/developper_guide.md) |
+| [Go to Developer Guide](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/developer_guide.md) |
 |---| 
 
 </div>
