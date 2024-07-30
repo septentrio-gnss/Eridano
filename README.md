@@ -2,10 +2,11 @@
 
 # Eridano: Septentrio Arduino Library
 
-<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Logo.png" width=225 height=225>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Logo.png" width=225 height=225>
 
 This Arduino library has been created to make Septentrio GNSS easier to use with Arduino hardware. <br>
 **Make sure that both the Arduino's and the receiver's baudrate match to use this library (keep in mind that the default baudrate for Septentrio is 115200 but it is not supported by AltSoftSerial used in some examples).**  <br> 
+
 <br>
 
 ## Authors 
@@ -13,19 +14,22 @@ This Arduino library has been created to make Septentrio GNSS easier to use with
 |-----------------------|----------|
 | chiara de Saint Giniez| [chiara-septentrio](https://github.com/chiara-septentrio)|
 
-## Maintainer 
+<br>
 
+## Maintainer 
 | GitHub |
 |--------|
 | <a href="https://github.com/septentrio-users">septentrio-users</a> </br> |  
 
-## DO YOU HAVE ANY QUESTIONS? CONTACT SEPTENTRIO SUPPORT TEAM
+<br>
+
+## DO YOU HAVE ANY QUESTIONS?
 
 ## Septentrio resources
-
+This library is not officially supported by Septentrio however Septentrio can provide great help around Septentrio GNSS receivers
 | Septentrio website                                    | Contact                                                          | Resources |
 | :-:                                                   | :-:                                                              | :-: |
-| [Septentrio home page](https://www.septentrio.com/en) | [Septentrio contact page](https://www.septentrio.com/en/contact) | [Septentrio resource page](https://www.septentrio.com/en/support) |
+| [Septentrio home page](https://web.septentrio.com/GL-SSN-home) | [Septentrio contact page](https://web.septentrio.com/GH-SSN-contact) | [Septentrio resource page](https://web.septentrio.com/GH-SSN-support) |
 
 </div>
 
@@ -36,7 +40,7 @@ This Arduino library has been created to make Septentrio GNSS easier to use with
 * [Credits](#credits)
 
 ## What is Eridano
-Eridano is an Arduino Library for Septentrio receivers, it allows communcation between Arduino products and Septentrio receivers. By using its examples or creating your own, you can use all sorts of features from Septentrio receivers with the major ones being: 
+Eridano is an Arduino Library for Septentrio GNSS receivers, it allows communcation between Arduino products and Septentrio receivers. By using its examples or creating your own, you can use all sorts of features from Septentrio receivers with the major ones being: 
 * Parsing of SBF or NMEA
 * Logging
 * Corrections via NTRIP  
@@ -45,7 +49,7 @@ Eridano is an Arduino Library for Septentrio receivers, it allows communcation b
 
 ## Installation
 Eridano has been developped with the [official Arduino IDE](https://www.arduino.cc/en/software). Once it has been installed, the library can be easily implemented through it by:
-* Importing the library via the IDE (not available yet, needs approval from community)
+* Importing the library via the IDE (only available after approval from community)
 * Downloading the zip and importing it in the IDE (we would recommend putting it in your /library folder)
 You can then upload any of the examples through the IDE to the board.
 <br>
