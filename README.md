@@ -58,14 +58,6 @@ You can then upload any of the examples through the IDE to the board.
 |-----------------------|----------|
 | <img align=left src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Include%20library.png" size="20%" > | <img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Zip%20library.PNG" SIZE="20%"> |
 <br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
 
 ## How to use guides
 This open source projects provides user with two guides:
