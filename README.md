@@ -49,12 +49,14 @@ Eridano is an Arduino Library for Septentrio GNSS receivers, it allows communcat
 
 ## Installation
 Eridano has been developped with the [official Arduino IDE](https://www.arduino.cc/en/software). Once it has been installed, the library can be easily implemented through it by:
-* Importing the library via the IDE (only available after approval from community)
-* Downloading the zip and importing it in the IDE (we would recommend putting it in your /library folder)
+* A: Importing the library via the IDE (only available after approval from community)
+* B: Downloading the zip and importing it in the IDE (we would recommend putting it in your /library folder)
 You can then upload any of the examples through the IDE to the board.
 <br>
-<img align=left src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Include%20library.png" width=351 height=216>
-<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Zip%20library.PNG" width=351 height=222>
+
+| A: Including the library                                    | B: Using ZIP file                                                       |
+|-----------------------|----------|
+| <img align=left src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Include%20library.png" size="20%" > | <img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Zip%20library.PNG" SIZE="20%"> |
 <br>
 <br>
 <br>
