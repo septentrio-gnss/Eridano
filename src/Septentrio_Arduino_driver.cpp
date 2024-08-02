@@ -499,9 +499,9 @@ bool SEPTENTRIO_GNSS::checkId(nmeaBuffer_t *buffer)
     * @return Whether the buffer's ID is valid or not
     **/
     bool validId=false;
-    if (buffer->data[1]=='G')
+    if (buffer->data[1]=='G' || buffer->data[1]=='*')
     {
-        if ((buffer->data[2]=='P' || buffer->data[2]=='N' || buffer->data[2]=='L' || buffer->data[2]=='A' || buffer->data[2]=='B' || buffer->data[2]=='I' || buffer->data[2]=='Q'))
+        if ((buffer->data[2]=='P' || buffer->data[2]=='N' || buffer->data[2]=='L' || buffer->data[2]=='A' || buffer->data[2]=='B' || buffer->data[2]=='I' || buffer->data[2]=='Q') || buffer->data[2]==)
         {
             if (buffer->data[3]=='G' && buffer->data[4]=='G' && buffer->data[5]=='A')
             {
@@ -670,7 +670,7 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
                         SBFBuffer->msgSize=(tempBuffer->data[6] | tempBuffer->data[7]<<8);
                         if (SBFBuffer->data!=nullptr)
                         {
-                            delete[] SBFBuffer->data; /**avoid memory overflow**/
+                            SBFBuffer->data=nullptr; /**avoid memory overflow**/
                         }
                         SBFBuffer->data = new uint8_t[SBFBuffer->msgSize]; /**Give the correct size to data buffer, padding included**/
                         SBFBuffer->offset=0;
@@ -789,8 +789,8 @@ bool SEPTENTRIO_GNSS::checkNewByte(tempBuffer_t *tempBuffer, const uint8_t incom
         {
             if (NMEABuffer->data!=nullptr) /**Avoid memory overflow, may not be best practice*/
             {
-                delete[] NMEABuffer->data;
-                delete[] NMEABuffer;
+                NMEABuffer->data=nullptr;
+                NMEABuffer=nullptr;
             }
             NMEABuffer = new nmeaBuffer_t;
             NMEABuffer->data = new uint8_t[nmeaMaxSize]; 

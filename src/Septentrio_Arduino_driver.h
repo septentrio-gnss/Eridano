@@ -5,14 +5,14 @@
 #include "septentrio_structs.h"
 
 constexpr int headerSize = 8;
-constexpr int cmdMaxSize = 100; //TODO: check really relevant
-constexpr int nmeaMaxSize = 82; //TODO: check really relevant
+constexpr int cmdMaxSize = 100;
+constexpr int nmeaMaxSize = 82;
 
 
 //NTRIP Request sizes
-constexpr int ntripHeaderMaxSize = 300; //TODO
+constexpr int ntripHeaderMaxSize = 300;
 constexpr int requestStandardMaxSize=500;
-constexpr int RequestAuthMaxSize=50; //TODO: check
+constexpr int RequestAuthMaxSize=50;
 constexpr int RequestCustomMaxSize=100; //Added for potential other requirements of the ntrip caster
 
 //Do-not-use values
@@ -66,7 +66,6 @@ class SEPTENTRIO_GNSS
     
         //Buffer
         tempBuffer_t *tempBuffer = nullptr;
-        ntripBuffer_t *ntripBuffer = nullptr;
         nmeaBuffer_t *NMEABuffer = nullptr;
         sbfBuffer_t *SBFBuffer = nullptr;
         void fillBuffer(sbfBuffer_t *buffer, const uint8_t incomingByte);
