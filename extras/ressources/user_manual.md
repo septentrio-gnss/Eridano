@@ -4,7 +4,7 @@
 ## <center> Content of the library
 
 Two classes are defined in this library:
-* **SEPTENTRIO_GNSS** for general input and ouput limited to the receiver. 
+* **SEPTENTRIO_GNSS** for general input and output limited to the receiver. 
 * **SEPTENTRIO_NTRIP** for all operations related to NTRIP (see the NTRIP Client example's folder for more explanations). A caster and port must be provided when initializing. It can function with NTRIP 1 and 2, and HTTP protocol.
 Both need a **two-way serial connection** to the receiver to be initialized and work correctly. 
 
@@ -27,7 +27,7 @@ Some example use the __AltSoftSerial__ library with its __default pins__ (9 for 
     * not yet tested
 * ntrip_client : 
     * creates an NTRIP client from the Arduino board and sends correction data to the receiver through serial
-    * This example requiers a WiFi connection to work
+    * This example requires a WiFi connection to work
 
 ---
 ## Detailed explanations
@@ -49,7 +49,7 @@ Some example use the __AltSoftSerial__ library with its __default pins__ (9 for 
 * [How to adapt it for you](#how-to-adapt-it-for-you)  
 
 #### What this example does 
-This example sets up a connection between the Arduino board and the Septentrion GNSS and allows for commands to be sen through the serial monitor
+This example sets up a connection between the Arduino board and the Septentrion GNSS and allows for commands to be sent through the serial monitor
 This example has been tested with "setSBFOutput, Stream1, USB2, PVTGeod, sec2" and "setSBFOutput, Stream1, none, none, off", the data from USB2 was monitored through DataLink.
 If you have issue with this example, make sure your receiver can receive commands, the "SSSSSSSSSS" command should make sure of it if input is as default ('auto') as long as no correction is sent.
 
@@ -80,7 +80,7 @@ SBF is the Septentrio proprietary binary message format, you can learn more abou
 
 #### The PVTGeodetic message 
 
-The structure of the SBF blobk is the following:  
+The structure of the SBF block is the following:  
 
 | Byte number | Field name | Unit and scale   |Type                      | Description |
 | :---------: | :--------: | :--------------: | :----------------------: | :-----------| 
@@ -90,7 +90,7 @@ The structure of the SBF blobk is the following:
 | 4           | Length     | 1 byte           | 4 bytes unsigned integer | The size of the SBF block, including the header, in byte. It is always a multiple of four. |
 | 6           | TOW        | 0.001s           | 4 bytes unsigned integer | Time of week. Time-tag expressed in whole millisecond since the beginning of the GPS week. <br> DO-NOT-USE value is : **4294967295**|
 | 10          | WNc        | 1 week           | 2 bytes unsigned integer | GPS week number associated with the TOW, WNc is a continuous week count. It is not affected by GPS rollovers which occur every 1024 weeks. <br> DO-NOT-USE value is : **65535**|
-| 14          | Mode       |                  | 1 byte unsigned integer  | Bit field indicating the PVT mode, as follows : <ul> <li> Bits 0-3 : types of PVT solution <br> <ul> <li> 0 : no GNSS PVT available </li> <li> 1 : Stand-Alone PVT</li> <li> 2 : Differential PVT </li> <li> 3 : Fixed location </li> <li> 4 : RTK with fixed ambiguities </li> <li> 5 : RTK with float ambiguities </li> <li> 6 : SBAS aided PVT</li> <li> 7 : Moving-base RTK with fixed ambiguities </li> <li> 8 : Moving-base RTK with float ambiguities </li> <li> 9 : Reserved </li> <li> 10 : Precise Point Positioning (PPP) </li> <li> 11 : Reserved </li> </ul> </li> <li> Bits 4-5 : Reserved </li> <li> Bit 6 : Set if the user has entered the command **setPVTMode, Static, , auto** and the receiver is still in the process of deermining its fixed position </li> <li> Bit 7 : 2D/3D flag : set in 2D mode (height assumed constant and not computed) </li> </ul> |
+| 14          | Mode       |                  | 1 byte unsigned integer  | Bit field indicating the PVT mode, as follows : <ul> <li> Bits 0-3 : types of PVT solution <br> <ul> <li> 0 : no GNSS PVT available </li> <li> 1 : Stand-Alone PVT</li> <li> 2 : Differential PVT </li> <li> 3 : Fixed location </li> <li> 4 : RTK with fixed ambiguities </li> <li> 5 : RTK with float ambiguities </li> <li> 6 : SBAS aided PVT</li> <li> 7 : Moving-base RTK with fixed ambiguities </li> <li> 8 : Moving-base RTK with float ambiguities </li> <li> 9 : Reserved </li> <li> 10 : Precise Point Positioning (PPP) </li> <li> 11 : Reserved </li> </ul> </li> <li> Bits 4-5 : Reserved </li> <li> Bit 6 : Set if the user has entered the command **setPVTMode, Static, , auto** and the receiver is still in the process of determining its fixed position </li> <li> Bit 7 : 2D/3D flag : set in 2D mode (height assumed constant and not computed) </li> </ul> |
 | 15           | Error    |                   | 2 bytes unsigned integer | PVT error code : <ul> <li> 0 : No error </li> <li> 1 : Not enough measurement </li> <li> 2 : Not enough ephemerides available </li> <li> 3 : DOP too large (larger than 15) </li> <li> 4 : Sum of squared residuals too large </li> <li> 5 : No convergence </li> <li> 6 : Not enough measurements after outlier rejections </li> <li>  7 : Position output prohibited due to export laws <li> <li> 8 :  Base station coordinates unavailable </li> <li> 10 : Ambiguities not fixed and user requested only to output RTK-fixed positions |
 | 16          | Latitude   | 1 rad            | 8 bytes IEEE float       | Latitude, from $-\pi/2$ to $+\pi/2$, positive North of Equator. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** |
 | 24          | Longitude  | 1 rad            | 8 bytes IEEE float       | Longitude, from $-\pi$ to $+\pi$, positive East of Greenwich. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** . |
@@ -104,7 +104,7 @@ The structure of the SBF blobk is the following:
 | 68          | RxClkDrift | 1 ppm            | 4 bytes IEEE float       | Receiver clock bias relative to the GNSS system time (relative frequency error). Positive when the receiver clock runs faster than the system time. <br> DO-NOT-USE value is : **$\ -2.10^{-2}$** .|
 | 72          | TimeSystem |                  | 1 byte unsigned integer  | Time system to which the offset is provided in this sub-block. <ul> <li> 0 : GPS time </li> <li> 1 : Galileo time <li> <li> 3 : GLONASS time </li> <li> 4 : Beidou time </li> <li> 5 : QZSS time </li> <li> 100 : Fugro AtomiChron time </li> </ul> <br> DO-NOT-USE value is : **255** .|
 | 73          | Datum      |                  | 1 byte unsigned integer  | This field defines in which datum the coordinates are expressed : <ul> <li> 0 : WGS84/ITRS </li> <li> 19 : Datum equal to that used by  the DGNSS/RTK base station </li> <li> 30 : ETRS89 (ETRF2000 serialization) </li> <li> 31 : NAD83(2011), North american datum (2011)</li> <li> 32 : NAD83(PA11), North american datum, Pacific plate </li> <li> 33 : NAD83(MA11), North american datum, Marianas plate </li> <li> 34 : GDA94(2010), Geocentric datum of Australia (2010) </li> <li> GDA2020, Geocentric datum of Australia (2020) </li> 36 : JGD2011, Japanese geodetic datum 2011 </li> <li> 250 : First user-defined datum </li> <li> 251 : Second user-defined datum </li> </ul> <br> DO-NOT-USE value is : **255** .|
-| 74          | NrSv       |                  | 1 byte unsigned integer  | Total number of satelites used in the PVT computation. <br> DO-NOT-USE value is : **255** .|
+| 74          | NrSv       |                  | 1 byte unsigned integer  | Total number of satellites used in the PVT computation. <br> DO-NOT-USE value is : **255** .|
 | 75          | WaCorrInfo |                  | 1 byte unsigned integer  | Bit field providing information about which wide area corrections have been applied: <ul> <li> Bit 0: set if orbit and satellite clock correction information is used </li> <li> Bit 1: set if range correction information is used </li> <li> Bit 2: set if ionospheric information is used </li> <li> Bit 3: set if orbit accuracy information is used (UERE/SISA) </li> <li> Bit 4: set if DO229 Precision Approach mode is active </li> <li> Bits 5-6: Type of RTK corrections: <ul> <li> 0: Unknown or not in RTK mode </li> <li> 1: RTK with physical base </li> <li> 2: RTK with virtual base </li> <li> 3: RTK from SSR corrections (PPP-RTK) </li> <li> Bit 7: Reserved </li> </ul> </li> </ul> <br> DO-NOT-USE value is : **0** .|
 | 76          | referenceID|                  | 2 bytes unsigned integer | This field indicates the reference ID of the differential information used. <br> In case of DGNSS or RTK operation, this field is to be interpreted as the base station identifier. In SBAS operation, this field is to be interpreted as the PRN of the geostationary satellite used (from 120 to 158). <br> If multiple base stations or multiple geostationary satellites are used the value is set to DO-NOT-USE value : **65534**. |
 | 78          | meanCorrAge| 0.01 s           | 2 bytes unsigned integer | In case of DGNSS or RTK, this field is the mean age of the differential corrections. <br> In case of SBAS operation, this field is the mean age of the ’fast corrections’ provided by the SBAS satellites. <br> In case of PPP, this is the age of the last received clock or orbit correction message. <br> DO-NOT-USE value is : **65534**. |
@@ -233,7 +233,7 @@ This program can also be run with a debug mode to use with a monitor (ex. the Se
 #### Hardware setup
 
 This example requires : 
-* an Arduino board or module with an internet connection and functionning uart port
+* an Arduino board or module with an internet connection and functioning uart port
 * a Septentrio receiver, make sure its baudrate and the one used in the code match
 * a uart connection between the Arduino and Septentrio receiver 
 <img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/hardware_setup.jpg" width=354 height=266/>
