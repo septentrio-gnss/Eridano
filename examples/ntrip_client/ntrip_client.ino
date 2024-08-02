@@ -7,6 +7,12 @@
 #include "secrets.h"
 
 #include "WiFiS3.h"
+#define USER_AGENT "ntrip_prog/1.0"
+const char casterHost[] = "caster.world";
+const uint16_t casterPort = 2101;
+const char casterUser[]= "USER01";
+const char casterUserPwd[]= "PWD";
+const char mountPoint[]= "MountPoint";
 
 #define baudrate 9600
 #define rtcmTimeOut 5000 //in ms
@@ -67,13 +73,11 @@ void setup() {
   myNTRIP.ntripProperties->caster.Mountpoint=mountPoint;
   myNTRIP.ntripTempBuffer = new ntripTempBuffer_t;
   myNTRIP.ntripTempBuffer->data = new uint8_t[ntripHeaderMaxSize];
-  //myNTRIP.ntripProperties->nmeaData = new char[nmeaMaxSize];
+  myNTRIP.ntripProperties->nmeaData = new char[nmeaMaxSize];
   int ntripRequestMaxSize=requestStandardMaxSize+ (myNTRIP.ntripProperties->userCredent64!=nullptr)*RequestAuthMaxSize+ (myNTRIP.ntripProperties->nmeaData!=nullptr)*nmeaMaxSize+ (myNTRIP.ntripProperties->custom!=nullptr)*RequestCustomMaxSize;
   myNTRIP.ntripRequestBuffer = new char[ntripRequestMaxSize];
-
-  //strncpy(myNTRIP.ntripProperties->nmeaData, "$GPGGA,070803.453,5050.913,N,00443.930,E,1,12,1.0,0.0,M,0.0,M,,*62", nmeaMaxSize);
-  //Optionnal:
-  //pinMode(LED_BUILTIN, OUTPUT);
+  //you can put a default nmea here
+  //strncpy(myNTRIP.ntripProperties->nmeaData, "$GPGGA,time,lat,N,long,E,1,12,1.0,0.0,M,0.0,M,,*FF", nmeaMaxSize);
 }
 
 void loop() {
