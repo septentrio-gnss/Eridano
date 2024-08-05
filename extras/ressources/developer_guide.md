@@ -27,9 +27,9 @@ This class contains:
 
 Here is how messages are processed in checkNewByte:
 <center> SBF version </center>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/SBF_byteFlow.jpg")
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/SBF_byteFlow.jpg"/>
 <center> NMEA version </center>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/NMEA_byteFlow.jpg")
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/NMEA_byteFlow.jpg"/>
 
 ## NTRIP connection
 #### How it works
