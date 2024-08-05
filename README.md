@@ -2,7 +2,7 @@
 
 # Eridano: Septentrio Arduino Library
 
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Logo.png" width=225 height=225>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/Logo.png" width=225 height=225>
 
 This Arduino library has been created to make Septentrio GNSS easier to use with Arduino hardware. <br>
 **Make sure that both the Arduino's and the receiver's baudrate match to use this library (keep in mind that the default baudrate for Septentrio is 115200 but it is not supported by AltSoftSerial used in some examples).**  <br> 
@@ -56,7 +56,7 @@ You can then upload any of the examples through the IDE to the board.
 
 | A: Including the library                                    | B: Using ZIP file                                                       |
 |-----------------------|----------|
-| <img align=left src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Include%20library.png" size="20%" > | <img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/Zip%20library.PNG" SIZE="20%"> |
+| <img align=left src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/Include%20library.png" size="20%" > | <img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/Zip%20library.PNG" SIZE="20%"> |
 <br>
 
 ## How to use guides
@@ -67,14 +67,14 @@ This open source projects provides user with two guides:
 The user manual aims to explain how to use the examples and adapt them to the user's need.  
 <div align="center"> 
 
-| [Go to User Manual](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/user_manual.md) |
+| [Go to User Manual](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/ressources/user_manual.md) |
 |---|
 
  </div>
 The developer manual aims to explain the logic behind the library for those who want to implement more features or keep the current ones up to date.  
 <div align="center"> 
 
-| [Go to Developer Guide](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/developer_guide.md) |
+| [Go to Developer Guide](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/ressources/developer_guide.md) |
 |---| 
 
 </div>

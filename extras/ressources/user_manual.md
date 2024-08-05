@@ -199,7 +199,7 @@ As is, this example can't be used for multiple message ID as *checkNewByte* only
 * [How to adapt it for you](#how-to-adapt-it-for-you-4)  
 
 #### What is NTRIP?
-<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/NTRIP_diagram.png" width=330 height=200/>
+<img align=right src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/NTRIP_diagram.png" width=330 height=200/>
 NTRIP, or Network Transport of RTCM via Internet Protocol, is a protocol for streaming RTK (Real Time Kinematic) corrections through an internet connection. <br>
 
 It is based on HTTP/1.1 protocol and is composed of:
@@ -236,11 +236,11 @@ This example requires :
 * an Arduino board or module with an internet connection and functioning uart port
 * a Septentrio receiver, make sure its baudrate and the one used in the code match
 * a uart connection between the Arduino and Septentrio receiver 
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/hardware_setup.jpg" width=354 height=266/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/hardware_setup.jpg" width=354 height=266/>
 
 
 #### How to adapt it for you
 You can adapt to any WiFi that could be supported by your Arduino board. The same way, you can adapt to any NTRIP caster that used no or basic authentication.  
 If you only want to get the sourcetable, you can leave the mountpoint empty and display the incoming data.
-The NTRIP class also has the functions to create the request for RTP connection but no example has been made with it.
+The NTRIP class also has the functions to create the request for RTP connection but no example has been made with it.   
 [Back to top](#user-manual)

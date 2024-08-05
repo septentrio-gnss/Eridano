@@ -27,9 +27,9 @@ This class contains:
 
 Here is how messages are processed in checkNewByte:
 <center> SBF version </center>
-![SBF flow process](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/SBF_byteFlow.jpg)
+![SBF flow process](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/SBF_byteFlow.jpg)
 <center> NMEA version </center>
-![NMEA flow process](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/NMEA_byteFlow.jpg)
+![NMEA flow process](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/NMEA_byteFlow.jpg)
 
 ## NTRIP connection
 #### How it works
@@ -49,8 +49,8 @@ The most common NTRIP errors have special instruction but otherwise a list of th
 
 ## NTRIP connection
 
-The NTRIP example is the most intricate of the library. You can take a look at the [user manual](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/ressources/user_manual.md) for a general explanation of NTRIP. This part aims to explain the workflow of the example, starting with a general overview:<br>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_general_workflow_portrait.jpg"/> 
+The NTRIP example is the most intricate of the library. You can take a look at the [user manual](https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/ressources/user_manual.md) for a general explanation of NTRIP. This part aims to explain the workflow of the example, starting with a general overview:<br>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/ntrip_general_workflow_portrait.jpg"/> 
 This example uses the HTTP protocol to connect to the NTRIP caster, the user first has to provide different inputs to fill the request message (caster, mountpoint, id and password). Connection is done thanks to the WiFi library of Arduino and needs to be adapted to each boards. Once connection with WiFi and caster has been established, the request buffer is sent to the caster.\
 Once the response has been received, the program first checks for a success code ('200'); if it finds it, it then checks for NTRIP version through the syntax of the 200 response and extract the relevant data from the header; otherwise, unless debug is enabled and the error code is printed, no further process is done.\
 If the connexion is successful, the program then checks for data type and will only process sourcetables, by comparing requirements for the mountpoint, or correction data, by passing them to the receiver.
@@ -58,7 +58,7 @@ When data stops being sent, the program checks that the connexion still exist (a
 Below are more detailed flowchart of 
 <br clear="left"/>
 <p>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_header_processing_portrait.jpg" width="38%" height="38%"/>
-<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/images/ntrip_content_processing_portrait.jpg" width="60%" height="60%"/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/ntrip_header_processing_portrait.jpg" width="38%" height="38%"/>
+<img align=center src="https://github.com/septentrio-gnss/Septentrio_Arduino_library/blob/main/extras/images/ntrip_content_processing_portrait.jpg" width="60%" height="60%"/>
 </p>
 
